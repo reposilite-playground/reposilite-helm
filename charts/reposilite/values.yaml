@@ -150,7 +150,7 @@ rollingUpdate:
 ## Readiness and liveness probes
 probes:
   port: 8080 # The port Reposilite is running on inside the pod.
-  scheme: "http" # Scheme to use in GET requests.
+  scheme: "HTTP" # Scheme to use in GET requests.
   readiness:
     initialDelaySeconds: 2
     periodSeconds: 10
@@ -161,7 +161,7 @@ probes:
     initialDelaySeconds: 2
     periodSeconds: 10
     timeoutSeconds: 2
-    successThreshold: 2
+    successThreshold: 1
     failureThreshold: 3
 
 ## Persistent Volume Claim
@@ -196,17 +196,3 @@ nodeSelector: {}
 
 ## Pod tolerations
 tolerations: []
-
-## Security context
-## To run the container with ports below 1024 this will need to be adjusted to run Reposilite as root
-securityContext:
-  capabilities:
-    drop: [ALL]
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsGroup: 65532
-  runAsUser: 65532
-
-## Pod security context
-podSecurityContext:
-  fsGroup: 65532

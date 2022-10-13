@@ -48,10 +48,6 @@
         - name: "http"
           containerPort: {{ .Values.service.port }}
           protocol: TCP
-        {{- with .Values.securityContext }}
-        securityContext:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
         volumeMounts:
           - name: {{ .Values.persistence.name }}
             mountPath: {{ .Values.persistence.path }}
@@ -90,10 +86,6 @@
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.podSecurityContext }}
-      securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 {{ end -}}
