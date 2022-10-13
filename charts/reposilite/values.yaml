@@ -1,0 +1,212 @@
+## Default values for reposilite.
+image:
+  name: dzikoysk/reposilite
+  tag: "" # defaults to appVersion
+  pullPolicy: IfNotPresent
+
+## Name overrides
+nameOverride: ""
+fullnameOverride: ""
+
+## Deployment configuration
+deployment:
+  # Number of replicas to be deployed.
+  replicas: 1
+  # Time in seconds before Kubernetes sends a SIGKILL signal if Reposilite doesn't gracefully shut down.
+  terminationGracePeriodSeconds: 60
+  # The minimum time in seconds Reposilite needs to be running before the Deployment controller considers it available.
+  minReadySeconds: 0
+  # Additional annotations to be added to the Deployment
+  annotations: {}
+  # Additional labels to be added to the Deployment
+  labels: {}
+  # Additional annotations to be added to pods
+  podAnnotations: {}
+  # Additional labels to be added to pods
+  podLabels: {}
+  # Init containers
+  initContainers: []
+    # - name: name
+    #   image: alpine
+    #   args: []
+    #   volumeMounts:
+    #     - name: volume-name
+    #       mountPath: /data
+  # Additional containers
+  additionalContainers: []
+    # - name: name
+    #   image: alpine
+    #   args: []
+    #   volumeMounts:
+    #     - name: volume-name
+    #       mountPath: /data
+  # Additional volumes for use with initContainers and additionalContainers
+  additionalVolumes: []
+    # - name: name
+    #   hostPath:
+    #     path: /tmp
+  # Image pull secrets
+  imagePullSecrets: []
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 40"]
+    # postStart:
+    #   httpGet:
+    #     path: /
+    #     port: 8080
+    #     host: localhost
+    #     scheme: http
+
+## Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+## HorizontalPodAutoscaler configuration.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 60
+  behavior:
+   scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+
+## If you would like to create an ingress for Reposilite's frontend, you can enable it here.
+## Please refer to your ingress provider's documentation for configuration that may be specific
+## to their ingress implementation.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: reposilite.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+## Resources
+resources:
+  limits:
+    cpu: 100m
+    memory: 32Mi
+  requests:
+    cpu: 100m
+    memory: 16Mi
+
+## Environment variables
+env:
+#  - name: JAVA_OPTS
+#    value: "-Xmx16M"
+#  - name: REPOSILITE_OPTS
+#    value: "--port 8080"
+#  - name: SOME_VAR_FROM_CONFIG_MAP
+#    valueFrom:
+#      configMapRef:
+#        name: config-name
+#        key: config-key
+#  - name: SOME_VAR_FROM_SECRET
+#    valueFrom:
+#      secretKeyRef:
+#        name: secret-name
+#        key: secret-key
+
+## Environment variables from
+envFrom: []
+# - configMapRef:
+#     name: config-map-name
+# - secretRef:
+#     name: secret-name
+
+## Rolling update
+rollingUpdate:
+  maxUnavailable: 0
+  maxSurge: 1
+
+## Readiness and liveness probes
+probes:
+  port: 8080 # The port Reposilite is running on inside the pod.
+  scheme: "http" # Scheme to use in GET requests.
+  readiness:
+    initialDelaySeconds: 2
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 1
+  liveness:
+    initialDelaySeconds: 2
+    periodSeconds: 10
+    timeoutSeconds: 2
+    successThreshold: 2
+    failureThreshold: 3
+
+## Persistent Volume Claim
+## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+## RECOMMENDED: This is required to persist configuration changes and artifacts!
+persistence:
+  enabled: true
+  name: "data"
+  size: 4Gi
+# storageClass: "" # Use this if you wish to define a StorageClass to use.
+  accessMode: ReadWriteOnce
+  annotations: {}
+# existingClaim: "" # Use this if you already have an existing PVC for Reposilite.
+  path: /app/data
+# subPath: "" # Only mount a subdirectory of the Volume to the pod.
+
+## Service account
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+## Pod affinity
+affinity: {}
+
+## Pod node selector
+nodeSelector: {}
+
+## Pod tolerations
+tolerations: []
+
+## Security context
+## To run the container with ports below 1024 this will need to be adjusted to run Reposilite as root
+securityContext:
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsGroup: 65532
+  runAsUser: 65532
+
+## Pod security context
+podSecurityContext:
+  fsGroup: 65532

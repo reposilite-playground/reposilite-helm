@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "reposilite.fullname" . }}
+  annotations:
+  {{- with .Values.deployment.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+  {{- include "reposilite.labels" . | nindent 4 -}}
+  {{- with .Values.deployment.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ default 1 .Values.deployment.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "reposilite.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    {{- with .Values.rollingUpdate }}
+    rollingUpdate:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+  minReadySeconds: {{ .Values.deployment.minReadySeconds }}
+  template: {{ template "reposilite.podTemplate" . }}
