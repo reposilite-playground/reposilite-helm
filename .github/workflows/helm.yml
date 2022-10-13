@@ -31,7 +31,6 @@ jobs:
       - name: "Release"
         uses: helm/chart-releaser-action@v1.4.1
         with:
-          charts_dir: charts/*
           charts_repo_url: https://helm.reposilite.com
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
