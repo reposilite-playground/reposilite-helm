@@ -24,6 +24,7 @@
       - name: {{ template "reposilite.fullname" . }}
         image: "{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        stdin: true
         {{- with .Values.resources }}
         resources:
           {{- toYaml . | nindent 10 }}
