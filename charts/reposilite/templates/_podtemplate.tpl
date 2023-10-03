@@ -16,6 +16,9 @@
       {{- end }}
       serviceAccountName: {{ include "reposilite.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ default 60 .Values.deployment.terminationGracePeriodSeconds }}
+      {{- if .Values.deployment.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.deployment.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       {{- with .Values.deployment.initContainers }}
       initContainers:
         {{- toYaml . | nindent 6 }}
@@ -62,6 +65,9 @@
         {{- with .Values.envFrom }}
         envFrom:
           {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.deployment.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.deployment.containerSecurityContext "enabled" | toYaml | nindent 10 }}
         {{- end }}
       {{- if .Values.deployment.additionalContainers }}
         {{- toYaml .Values.deployment.additionalContainers | nindent 6 }}

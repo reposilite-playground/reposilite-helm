@@ -57,6 +57,14 @@ deployment:
     #     port: 8080
     #     host: localhost
     #     scheme: http
+  podSecurityContext:
+    enabled: false
+    fsGroup: 999
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 999
+    runAsGroup: 999
+
 
 ## Service configuration
 service:
