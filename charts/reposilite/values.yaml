@@ -57,9 +57,11 @@ deployment:
     #     port: 8080
     #     host: localhost
     #     scheme: http
+  # Security context for all initContainers and containers in the pod
   podSecurityContext:
     enabled: false
     fsGroup: 999
+  # Security context specific to the runtime container in the pod.
   containerSecurityContext:
     enabled: false
     runAsUser: 999
