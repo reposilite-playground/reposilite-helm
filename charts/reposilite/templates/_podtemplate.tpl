@@ -55,6 +55,9 @@
             {{- if .Values.persistence.subPath }}
             subPath: {{ .Values.persistence.subPath }}
             {{- end }}
+          {{- if .Values.deployment.additionalVolumeMounts }}
+          {{- toYaml .Values.deployment.additionalVolumeMounts | nindent 10 }}
+          {{- end }}
         {{- with .Values.env }}
         env:
           {{- toYaml . | nindent 10 }}

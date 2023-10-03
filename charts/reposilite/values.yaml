@@ -40,11 +40,17 @@ deployment:
     #   volumeMounts:
     #     - name: volume-name
     #       mountPath: /data
-  # Additional volumes for use with initContainers and additionalContainers
+  # Additional volumes for use with initContainers, additionalContainers and runtime container itself
   additionalVolumes: []
     # - name: name
     #   hostPath:
     #     path: /tmp
+    # - name: logging
+    #   emptyDir: {}
+  # Additional mount points for the runtime container. Refer to volumes defined in `additionalVolumes`.
+  additionalVolumeMounts: []
+    # - name: logging
+    #   mountPath: /var/log/reposilite/
   # Image pull secrets
   imagePullSecrets: []
   lifecycle: {}
