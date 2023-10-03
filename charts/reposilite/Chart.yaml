@@ -1,6 +1,6 @@
 apiVersion: v2
 name: reposilite
-version: "1.2.8" # The version of this chart.
+version: "1.2.9" # The version of this chart.
 appVersion: "3.4.9" # The latest version of Reposilite.
 description: "Lightweight and easy-to-use repository management software dedicated for the Maven based artifacts in the JVM ecosystem"
 icon: https://raw.githubusercontent.com/dzikoysk/reposilite/main/reposilite-site/public/images/favicon.png
