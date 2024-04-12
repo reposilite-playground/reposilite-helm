@@ -15,5 +15,8 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+      {{- if (and (contains "NodePort" .Values.service.type) (not (empty .Values.service.nodePort))) }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }
   selector:
     {{- include "reposilite.selectorLabels" . | nindent 4 }}
