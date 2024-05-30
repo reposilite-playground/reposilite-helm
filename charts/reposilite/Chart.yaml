@@ -15,6 +15,7 @@ keywords: # A list of keywords for Reposilite.
   - repository-manager
 sources: # A list of URLs to the source code of Reposilite.
   - https://github.com/dzikoysk/reposilite
+  - https://github.com/reposilite-playground/reposilite-helm
 maintainers: # A list of Chart maintainers
   - name: dzikoysk
     email: dzikoysk@dzikoysk.net
