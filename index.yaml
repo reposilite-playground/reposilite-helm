@@ -2,6 +2,33 @@ apiVersion: v1
 entries:
   reposilite:
   - apiVersion: v2
+    appVersion: 3.5.22
+    created: "2025-03-09T14:50:37.070568355Z"
+    description: Lightweight and easy-to-use repository management software dedicated
+      for the Maven based artifacts in the JVM ecosystem
+    digest: ae19770d978a0093b9e33505396141adae30a79204654ba9ca9dd711cce9328f
+    icon: https://raw.githubusercontent.com/dzikoysk/reposilite/main/reposilite-site/public/images/favicon.png
+    keywords:
+    - reposilite
+    - maven
+    - gradle
+    - sbt
+    - deploy
+    - artifact-repository-manager
+    - repository-manager
+    maintainers:
+    - email: dzikoysk@dzikoysk.net
+      name: dzikoysk
+      url: https://github.com/dzikoysk
+    name: reposilite
+    sources:
+    - https://github.com/dzikoysk/reposilite
+    - https://github.com/reposilite-playground/reposilite-helm
+    type: application
+    urls:
+    - https://github.com/reposilite-playground/reposilite-helm/releases/download/reposilite-1.3.20/reposilite-1.3.20.tgz
+    version: 1.3.20
+  - apiVersion: v2
     appVersion: 3.5.21
     created: "2025-02-10T22:37:22.699169226Z"
     description: Lightweight and easy-to-use repository management software dedicated
@@ -1180,4 +1207,4 @@ entries:
     urls:
     - https://github.com/reposilite-playground/reposilite-helm/releases/download/reposilite-1.0.0/reposilite-1.0.0.tgz
     version: 1.0.0
-generated: "2025-02-10T22:37:22.699639763Z"
+generated: "2025-03-09T14:50:37.070930048Z"
