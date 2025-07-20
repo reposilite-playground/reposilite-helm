@@ -9,6 +9,19 @@
 {{- end }}
 {{- end }}
 
+
+{{/* env */}}
+
+{{- define "reposilite.deployment.reposilite.env" -}}
+{{- $env := .Values.deployment.reposilite.env | default list }}
+{{- if .Values.persistentVolumeClaim.enabled }}
+{{- $env = concat $env (list (dict "name" "REPOSILITE_DATA" "value" .Values.persistentVolumeClaim.path )) }}
+{{- end }}
+{{ toYaml (dict "env" $env) }}
+{{- end -}}
+
+REPOSILITE_DATA
+
 {{/* image */}}
 
 {{- define "reposilite.deployment.images.reposilite.fqin" -}}

@@ -13,6 +13,11 @@ tests:
     persistentVolumeClaim.enabled: true
   asserts:
   - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: REPOSILITE_DATA
+        value: /var/lib/reposilite/data
+  - contains:
       path: spec.template.spec.containers[0].volumeMounts
       content:
         name: data
@@ -29,6 +34,11 @@ tests:
     persistentVolumeClaim.enabled: true
     persistentVolumeClaim.path: /usr/lib/reposilite/data
   asserts:
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: REPOSILITE_DATA
+        value: /usr/lib/reposilite/data
   - contains:
       path: spec.template.spec.containers[0].volumeMounts
       content:

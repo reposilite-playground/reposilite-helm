@@ -46,9 +46,10 @@ spec:
         - {{ . | quote }}
         {{- end }}
         {{- end }}
-        {{- with .Values.deployment.reposilite.env }}
+        {{- $env := (include "reposilite.deployment.reposilite.env" . | fromYaml) }}
+        {{- if and (hasKey $env "env") (gt (len $env.env) 0) }}
         env:
-          {{- toYaml . | nindent 10 }}
+        {{- toYaml $env.env | nindent 8 }}
         {{- end }}
         {{- with .Values.deployment.reposilite.envFrom }}
         envFrom:
