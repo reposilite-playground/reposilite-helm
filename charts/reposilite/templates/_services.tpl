@@ -2,26 +2,26 @@
 
 {{/* annotations */}}
 
-{{- define "reposilite.services.http.annotations" -}}
+{{- define "reposilite.service.annotations" -}}
 {{ include "reposilite.annotations" . }}
-{{- if .Values.services.http.annotations }}
-{{ toYaml .Values.services.http.annotations }}
+{{- if .Values.service.annotations }}
+{{ toYaml .Values.service.annotations }}
 {{- end }}
 {{- end }}
 
 {{/* labels */}}
 
-{{- define "reposilite.services.http.labels" -}}
+{{- define "reposilite.service.labels" -}}
 {{ include "reposilite.labels" . }}
-{{- if .Values.services.http.labels }}
-{{ toYaml .Values.services.http.labels }}
+{{- if .Values.service.labels }}
+{{ toYaml .Values.service.labels }}
 {{- end }}
 {{- end }}
 
 {{/* names */}}
 
-{{- define "reposilite.services.http.name" -}}
-{{- if .Values.services.http.enabled -}}
-{{ include "reposilite.fullname" . }}-http
+{{- define "reposilite.service.name" -}}
+{{- if .Values.service.enabled -}}
+{{ include "reposilite.fullname" . }}
 {{- end -}}
 {{- end -}}

@@ -6,11 +6,11 @@ release:
   name: reposilite-unittest
   namespace: testing
 templates:
-- templates/serviceHTTP.yaml
+- templates/service.yaml
 tests:
 - it: Skip service when disabled.
   set:
-    services.http.enabled: false
+    service.enabled: false
   asserts:
   - hasDocuments:
       count: 0
@@ -22,7 +22,7 @@ tests:
   - containsDocument:
       apiVersion: v1
       kind: Service
-      name: reposilite-unittest-http
+      name: reposilite-unittest
       namespace: testing
   - notExists:
       path: metadata.annotations
@@ -74,37 +74,37 @@ tests:
 
 - it: Require internalTrafficPolicy.
   set:
-    services.http.internalTrafficPolicy: ""
+    service.internalTrafficPolicy: ""
   asserts:
   - failedTemplate:
     errorMessage: No internal traffic policy defined!
 
 - it: Require port.
   set:
-    services.http.port: ""
+    service.port: ""
   asserts:
   - failedTemplate:
     errorMessage: No service port defined!
 
 - it: Require sessionAffinity.
   set:
-    services.http.sessionAffinity: ""
+    service.sessionAffinity: ""
   asserts:
   - failedTemplate:
     errorMessage: No session affinity defined!
 
 - it: Require service type.
   set:
-    services.http.type: ""
+    service.type: ""
   asserts:
   - failedTemplate:
     errorMessage: No service type defined!
 
 - it: Render service with custom annotations and labels.
   set:
-    services.http.annotations:
+    service.annotations:
       foo: bar
-    services.http.labels:
+    service.labels:
       bar: foo
   asserts:
   - equal:
@@ -123,19 +123,19 @@ tests:
 
 - it: Change defaults
   set:
-    services.http.externalIPs:
+    service.externalIPs:
     - "10.11.12.13/32"
-    services.http.externalTrafficPolicy: Local
-    services.http.internalTrafficPolicy: Local
-    services.http.ipFamilies:
+    service.externalTrafficPolicy: Local
+    service.internalTrafficPolicy: Local
+    service.ipFamilies:
     - IPv4
-    services.http.loadBalancerClass: aws
-    services.http.loadBalancerIP: "11.12.13.14"
-    services.http.loadBalancerSourceRanges:
+    service.loadBalancerClass: aws
+    service.loadBalancerIP: "11.12.13.14"
+    service.loadBalancerSourceRanges:
     - "11.12.0.0/17"
-    services.http.port: 10443
-    services.http.sessionAffinity: ClientIP
-    services.http.type: LoadBalancer
+    service.port: 10443
+    service.sessionAffinity: ClientIP
+    service.type: LoadBalancer
   asserts:
   - equal:
       path: spec.externalIPs

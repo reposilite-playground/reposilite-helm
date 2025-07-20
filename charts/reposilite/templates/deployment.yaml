@@ -12,7 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.hpa.enabled }}
   replicas: {{ default 1 .Values.deployment.replicas }}
   {{- end }}
   selector:
@@ -81,7 +81,7 @@ spec:
         {{- end }}
         ports:
         - name: "http"
-          containerPort: {{ required "No pod port defined!" .Values.services.http.port }}
+          containerPort: {{ required "No pod port defined!" .Values.service.port }}
           protocol: TCP
         volumeMounts:
           - name: {{ .Values.persistence.name }}

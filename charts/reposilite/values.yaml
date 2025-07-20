@@ -1,6 +1,6 @@
 ## Default values for reposilite.
 image:
-  name: dzikoysk/reposilite
+  name: docker.io/dzikoysk/reposilite
   tag: "" # defaults to appVersion
   pullPolicy: IfNotPresent
 
@@ -73,25 +73,6 @@ deployment:
     runAsUser: 999
     runAsGroup: 999
 
-
-## Service configuration
-services:
-  http:
-    enabled: true
-    annotations: {}
-    externalIPs: []
-    externalTrafficPolicy: "Cluster"
-    internalTrafficPolicy: "Cluster"
-    ipFamilies: []
-    labels: {}
-    loadBalancerClass: ""
-    loadBalancerIP: ""
-    loadBalancerSourceRanges: []
-    port: 8080
-    sessionAffinity: "None"
-    sessionAffinityConfig: {}
-    type: "ClusterIP"
-
 ## @section Horizontal Pod Autoscaler (HPA)
 # In order for the HPA to function successfully, a metric server is required, especially for resource consumption. The
 # metric server enables the CPU and memory utilisation to be recorded. If such a metric server is not available, the HPA
@@ -134,51 +115,62 @@ hpa:
   minReplicas: 1
   maxReplicas: 10
 
-## If you would like to create an ingress for Reposilite's frontend, you can enable it here.
-## Please refer to your ingress provider's documentation for configuration that may be specific
-## to their ingress implementation.
+## @section Ingress
 ingress:
+  ## @param ingress.enabled Enable creation of an ingress resource. Requires, that the http service is also enabled.
+  ## @param ingress.className Ingress class.
+  ## @param ingress.annotations Additional ingress annotations.
+  ## @param ingress.labels Additional ingress labels.
   enabled: false
   className: "nginx"
   annotations: {}
-    # Using backend-protocol annotations is possible to indicate how NGINX should communicate with the backend service.
-    # (Replaces secure-backends in older versions) Valid Values: HTTP, HTTPS, AUTO_HTTP, GRPC, GRPCS and FCGI.
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-protocol
-    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-
-    # For NGINX, an 413 error will be returned to the client when the size in a request exceeds the maximum allowed size
-    # of the client request body. This size can be configured by the parameter client_max_body_size.
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#custom-max-body-size
-    # nginx.ingress.kubernetes.io/proxy-body-size: "128m"
-
-    # Specifies a Secret with the certificate tls.crt, key tls.key in PEM format used for authentication to a proxied
-    # HTTPS server. It should also contain trusted CA certificates ca.crt in PEM format used to verify the certificate
-    # of the proxied HTTPS server. This annotation expects the Secret name in the form "namespace/secretName"
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
-    # nginx.ingress.kubernetes.io/proxy-ssl-secret: ""
-
-    # Enables the specified protocols for requests to a proxied HTTPS server.
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
-    # nginx.ingress.kubernetes.io/proxy-ssl-protocols: "TLSv1.2 TLSv1.3"
-
-    # Allows to set proxy_ssl_name. This allows overriding the server name used to verify the certificate of the proxied
-    # HTTPS server. This value is also passed through SNI when a connection is established to the proxied HTTPS server.
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
-    # nginx.ingress.kubernetes.io/proxy-ssl-server-name: "{{ include \"reposilite.fullname\" $ }}"
-
-    # Enables or disables verification of the proxied HTTPS server certificate.
-    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
-    # nginx.ingress.kubernetes.io/proxy-ssl-verify: "on"
   labels: {}
+
+  ## @param ingress.hosts Ingress specific configuration. Let ingress controller listen on specific DNS names and path's.
+  ## @skip ingress.hosts Skip individual host configuration.
   hosts: []
   # - host: reposilite.example.local
   #   paths:
   #     - path: /
   #       pathType: Prefix
+
+  ## @param ingress.tls Ingress specific TLS configuration. Use TLS encryption for specific hostnames.
+  ## @skip ingress.tls Skip individual TLS configuration.
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+## @section Service
+## @param service.enabled Enable the service.
+## @param service.annotations Additional service annotations.
+## @param service.externalIPs External IPs for the service.
+## @param service.externalTrafficPolicy If `service.type` is `NodePort` or `LoadBalancer`, set this to `Local` to tell kube-proxy to only use node local endpoints for cluster external traffic. Furthermore, this enables source IP preservation.
+## @param service.internalTrafficPolicy If `service.type` is `NodePort` or `LoadBalancer`, set this to `Local` to tell kube-proxy to only use node local endpoints for cluster internal traffic.
+## @param service.ipFamilies IPFamilies is list of IP families (e.g. `IPv4`, `IPv6`) assigned to this service. This field is usually assigned automatically based on cluster configuration and only required for customization.
+## @param service.labels Additional service labels.
+## @param service.loadBalancerClass LoadBalancerClass is the class of the load balancer implementation this Service belongs to. Requires service from type `LoadBalancer`.
+## @param service.loadBalancerIP LoadBalancer will get created with the IP specified in this field. Requires service from type `LoadBalancer`.
+## @param service.loadBalancerSourceRanges Source range filter for LoadBalancer. Requires service from type `LoadBalancer`.
+## @param service.port Port to forward the traffic to.
+## @param service.sessionAffinity Supports `ClientIP` and `None`. Enable client IP based session affinity via `ClientIP`.
+## @param service.sessionAffinityConfig Contains the configuration of the session affinity.
+## @param service.type Kubernetes service type for the traffic.
+service:
+  enabled: true
+  annotations: {}
+  externalIPs: []
+  externalTrafficPolicy: "Cluster"
+  internalTrafficPolicy: "Cluster"
+  ipFamilies: []
+  labels: {}
+  loadBalancerClass: ""
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  port: 8080
+  sessionAffinity: "None"
+  sessionAffinityConfig: {}
+  type: "ClusterIP"
 
 ## Resources
 resources:

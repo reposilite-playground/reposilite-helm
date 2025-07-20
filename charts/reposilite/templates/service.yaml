@@ -1,0 +1,57 @@
+{{- if .Values.service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  {{- with (include "reposilite.service.annotations" . | fromYaml) }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with (include "reposilite.service.labels" . | fromYaml) }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  name: {{ include "reposilite.service.name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if not (empty .Values.service.externalIPs) }}
+  externalIPs:
+  {{- range .Values.service.externalIPs }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- if and (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort") ) .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
+  internalTrafficPolicy: {{ required "No internal traffic policy defined!" .Values.service.internalTrafficPolicy }}
+  {{- if .Values.service.ipFamilies }}
+  ipFamilies:
+  {{- range .Values.service.ipFamilies }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- if and (eq .Values.service.type "LoadBalancer") .Values.service.loadBalancerClass }}
+  loadBalancerClass: {{ .Values.service.loadBalancerClass }}
+  {{- end }}
+  {{- if and (eq .Values.service.type "LoadBalancer") .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  loadBalancerSourceRanges:
+  {{- range .Values.service.loadBalancerSourceRanges }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ required "No service port defined!" .Values.service.port }}
+  selector:
+    {{- include "reposilite.pod.selectorLabels" . | nindent 4 }}
+  sessionAffinity: {{ required "No session affinity defined!" .Values.service.sessionAffinity }}
+  {{- with .Values.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4}}
+  {{- end }}
+  type: {{ required "No service type defined!" .Values.service.type }}
+{{- end }}

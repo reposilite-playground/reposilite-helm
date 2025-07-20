@@ -29,7 +29,7 @@ spec:
           service:
             name: {{ include "reposilite.fullname" $ }}
             port:
-              number: {{ $.Values.services.http.port }}
+              number: {{ $.Values.service.port }}
       {{- end }}
   {{- end }}
   {{- if .Values.ingress.tls }}
