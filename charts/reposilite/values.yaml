@@ -75,10 +75,22 @@ deployment:
 
 
 ## Service configuration
-service:
-  type: ClusterIP
-  port: 8080
-  annotations: {}
+services:
+  http:
+    enabled: true
+    annotations: {}
+    externalIPs: []
+    externalTrafficPolicy: "Cluster"
+    internalTrafficPolicy: "Cluster"
+    ipFamilies: []
+    labels: {}
+    loadBalancerClass: ""
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    port: 8080
+    sessionAffinity: "None"
+    sessionAffinityConfig: {}
+    type: "ClusterIP"
 
 ## HorizontalPodAutoscaler configuration.
 autoscaling:
@@ -111,19 +123,46 @@ autoscaling:
 ## to their ingress implementation.
 ingress:
   enabled: false
-  className: ""
+  className: "nginx"
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: reposilite.local
-      paths:
-        - path: /
-          pathType: Prefix
+    # Using backend-protocol annotations is possible to indicate how NGINX should communicate with the backend service.
+    # (Replaces secure-backends in older versions) Valid Values: HTTP, HTTPS, AUTO_HTTP, GRPC, GRPCS and FCGI.
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-protocol
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+
+    # For NGINX, an 413 error will be returned to the client when the size in a request exceeds the maximum allowed size
+    # of the client request body. This size can be configured by the parameter client_max_body_size.
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#custom-max-body-size
+    # nginx.ingress.kubernetes.io/proxy-body-size: "128m"
+
+    # Specifies a Secret with the certificate tls.crt, key tls.key in PEM format used for authentication to a proxied
+    # HTTPS server. It should also contain trusted CA certificates ca.crt in PEM format used to verify the certificate
+    # of the proxied HTTPS server. This annotation expects the Secret name in the form "namespace/secretName"
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
+    # nginx.ingress.kubernetes.io/proxy-ssl-secret: ""
+
+    # Enables the specified protocols for requests to a proxied HTTPS server.
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
+    # nginx.ingress.kubernetes.io/proxy-ssl-protocols: "TLSv1.2 TLSv1.3"
+
+    # Allows to set proxy_ssl_name. This allows overriding the server name used to verify the certificate of the proxied
+    # HTTPS server. This value is also passed through SNI when a connection is established to the proxied HTTPS server.
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
+    # nginx.ingress.kubernetes.io/proxy-ssl-server-name: "{{ include \"reposilite.fullname\" $ }}"
+
+    # Enables or disables verification of the proxied HTTPS server certificate.
+    # https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#backend-certificate-authentication
+    # nginx.ingress.kubernetes.io/proxy-ssl-verify: "on"
+  labels: {}
+  hosts: []
+  # - host: reposilite.example.local
+  #   paths:
+  #     - path: /
+  #       pathType: Prefix
   tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 ## Resources
 resources:
@@ -133,6 +172,7 @@ resources:
   limits:
     cpu: 2.0
     memory: 256Mi
+    
 ## Environment variables
 env:
   - name: JAVA_OPTS

@@ -1,0 +1,110 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: Ingress HTTP template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/ingress.yaml
+tests:
+- it: Skip rendering when disabled
+  set:
+    ingress.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Rendering default values
+  set:
+    ingress.enabled: true
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      name: reposilite-unittest
+      namespace: testing
+  - notExists:
+      path: metadata.annotations
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - equal:
+      path: spec.ingressClassName
+      value: nginx
+  - isNullOrEmpty:
+      path: spec.rules
+  - notExists:
+      path: spec.tls
+
+- it: Render custom annotations and labels
+  set:
+    ingress.annotations:
+      foo: bar
+    ingress.enabled: true
+    ingress.labels:
+      foo: bar
+  asserts:
+  - equal:
+      path: metadata.annotations
+      value:
+        foo: bar
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        foo: bar
+        helm.sh/chart: reposilite-0.1.0
+
+- it: Render custom HTTP path and TLS
+  set:
+    ingress.enabled: true
+    ingress.hosts:
+    - host: reposilite.example.local
+      paths:
+      - path: /
+        pathType: Prefix
+    ingress.tls:
+    - secretName: reposilite-http-tls
+      hosts:
+      - reposilite.example.local
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      name: reposilite-unittest
+      namespace: testing
+  - equal:
+      path: spec.ingressClassName
+      value: nginx
+  - contains:
+      path: spec.rules
+      content:
+        host: reposilite.example.local
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: reposilite-unittest
+                port:
+                  number: 8080
+  - contains:
+      path: spec.tls
+      content:
+        hosts:
+        - reposilite.example.local
+        secretName: reposilite-http-tls

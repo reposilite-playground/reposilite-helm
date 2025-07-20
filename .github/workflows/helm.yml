@@ -13,8 +13,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: "Checkout repository"
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
 
@@ -24,9 +23,9 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: "Install Helm"
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4.3.0
         with:
-          version: v3.10.1
+          version: v3.18.4 # renovate: datasource=github-releases depName=helm/helm
 
       - name: "Release"
         uses: helm/chart-releaser-action@v1.4.1

@@ -1,0 +1,57 @@
+{{- if .Values.services.http.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  {{- with (include "reposilite.services.http.annotations" . | fromYaml) }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with (include "reposilite.services.http.labels" . | fromYaml) }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  name: {{ include "reposilite.services.http.name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if not (empty .Values.services.http.externalIPs) }}
+  externalIPs:
+  {{- range .Values.services.http.externalIPs }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- if and (or (eq .Values.services.http.type "LoadBalancer") (eq .Values.services.http.type "NodePort") ) .Values.services.http.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.services.http.externalTrafficPolicy }}
+  {{- end }}
+  internalTrafficPolicy: {{ required "No internal traffic policy defined!" .Values.services.http.internalTrafficPolicy }}
+  {{- if .Values.services.http.ipFamilies }}
+  ipFamilies:
+  {{- range .Values.services.http.ipFamilies }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  {{- if and (eq .Values.services.http.type "LoadBalancer") .Values.services.http.loadBalancerClass }}
+  loadBalancerClass: {{ .Values.services.http.loadBalancerClass }}
+  {{- end }}
+  {{- if and (eq .Values.services.http.type "LoadBalancer") .Values.services.http.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.services.http.loadBalancerIP }}
+  {{- end }}
+  {{- if eq .Values.services.http.type "LoadBalancer" }}
+  loadBalancerSourceRanges:
+  {{- range .Values.services.http.loadBalancerSourceRanges }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ required "No service port defined!" .Values.services.http.port }}
+  selector:
+    {{- include "reposilite.pod.selectorLabels" . | nindent 4 }}
+  sessionAffinity: {{ required "No session affinity defined!" .Values.services.http.sessionAffinity }}
+  {{- with .Values.services.http.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4}}
+  {{- end }}
+  type: {{ required "No service type defined!" .Values.services.http.type }}
+{{- end }}

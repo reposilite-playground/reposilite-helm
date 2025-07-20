@@ -1,0 +1,172 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: Service http template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/serviceHTTP.yaml
+tests:
+- it: Skip service when disabled.
+  set:
+    services.http.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Rendering service with default values.
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: v1
+      kind: Service
+      name: reposilite-unittest-http
+      namespace: testing
+  - notExists:
+      path: metadata.annotations
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - notExists:
+      path: spec.externalIPs
+  - notExists:
+      path: spec.externalTrafficPolicy
+  - equal:
+      path: spec.internalTrafficPolicy
+      value: Cluster
+  - notExists:
+      path: spec.ipFamilies
+  - notExists:
+      path: spec.loadBalancerClass
+  - notExists:
+      path: spec.loadBalancerIP
+  - notExists:
+      path: spec.loadBalancerSourceRanges
+  - equal:
+      path: spec.ports[0].name
+      value: http
+  - equal:
+      path: spec.ports[0].protocol
+      value: TCP
+  - equal:
+      path: spec.ports[0].port
+      value: 8080
+  - equal:
+      path: spec.selector
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/name: reposilite
+  - equal:
+      path: spec.sessionAffinity
+      value: None
+  - notExists:
+      path: spec.sessionAffinityConfig
+  - equal:
+      path: spec.type
+      value: ClusterIP
+
+- it: Require internalTrafficPolicy.
+  set:
+    services.http.internalTrafficPolicy: ""
+  asserts:
+  - failedTemplate:
+    errorMessage: No internal traffic policy defined!
+
+- it: Require port.
+  set:
+    services.http.port: ""
+  asserts:
+  - failedTemplate:
+    errorMessage: No service port defined!
+
+- it: Require sessionAffinity.
+  set:
+    services.http.sessionAffinity: ""
+  asserts:
+  - failedTemplate:
+    errorMessage: No session affinity defined!
+
+- it: Require service type.
+  set:
+    services.http.type: ""
+  asserts:
+  - failedTemplate:
+    errorMessage: No service type defined!
+
+- it: Render service with custom annotations and labels.
+  set:
+    services.http.annotations:
+      foo: bar
+    services.http.labels:
+      bar: foo
+  asserts:
+  - equal:
+      path: metadata.annotations
+      value:
+        foo: bar
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+        bar: foo
+
+- it: Change defaults
+  set:
+    services.http.externalIPs:
+    - "10.11.12.13/32"
+    services.http.externalTrafficPolicy: Local
+    services.http.internalTrafficPolicy: Local
+    services.http.ipFamilies:
+    - IPv4
+    services.http.loadBalancerClass: aws
+    services.http.loadBalancerIP: "11.12.13.14"
+    services.http.loadBalancerSourceRanges:
+    - "11.12.0.0/17"
+    services.http.port: 10443
+    services.http.sessionAffinity: ClientIP
+    services.http.type: LoadBalancer
+  asserts:
+  - equal:
+      path: spec.externalIPs
+      value:
+      - 10.11.12.13/32
+  - equal:
+      path: spec.externalTrafficPolicy
+      value: Local
+  - equal:
+      path: spec.internalTrafficPolicy
+      value: Local
+  - equal:
+      path: spec.ipFamilies
+      value:
+      - IPv4
+  - equal:
+      path: spec.loadBalancerClass
+      value: aws
+  - equal:
+      path: spec.loadBalancerIP
+      value: "11.12.13.14"
+  - equal:
+      path: spec.loadBalancerSourceRanges
+      value:
+      - "11.12.0.0/17"
+  - equal:
+      path: spec.ports[0].port
+      value: 10443
+  - equal:
+      path: spec.sessionAffinity
+      value: ClientIP
+  - equal:
+      path: spec.type
+      value: LoadBalancer

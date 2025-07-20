@@ -31,6 +31,12 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common annotations
+*/}}
+{{- define "reposilite.annotations" -}}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "reposilite.labels" -}}
