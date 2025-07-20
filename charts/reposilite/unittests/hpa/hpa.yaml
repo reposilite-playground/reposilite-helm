@@ -1,0 +1,152 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: HPA template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/hpa.yaml
+tests:
+- it: Skip rendering by default.
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Rendering when enabled - default
+  set:
+    hpa.enabled: true
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      name: reposilite-unittest
+      namespace: testing
+  - notExists:
+      path: metadata.annotations
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - isSubset:
+      path: spec.behavior
+      content:
+        scaleDown:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+          stabilizationWindowSeconds: 300
+  - lengthEqual:
+      path: spec.metrics
+      count: 2
+  - contains:
+      path: spec.metrics
+      content:
+        resource:
+          name: cpu
+          target:
+            averageUtilization: 65
+            type: Utilization
+        type: Resource
+  - contains:
+      path: spec.metrics
+      content:
+        resource:
+          name: memory
+          target:
+            averageUtilization: 65
+            type: Utilization
+        type: Resource
+  - equal:
+      path: spec.maxReplicas
+      value: 10
+  - equal:
+      path: spec.minReplicas
+      value: 1
+  - equal:
+      path: spec.scaleTargetRef
+      value:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: reposilite-unittest
+
+- it: Rendering when enabled - custom values
+  set:
+    hpa.enabled: true
+    hpa.annotations:
+      foo: bar
+    hpa.labels:
+      bar: foo
+    hpa.maxReplicas: 25
+    hpa.minReplicas: 5
+    hpa.metrics:
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 60
+          type: Utilization
+      type: Resource
+    - resource:
+        name: memory
+        target:
+          averageUtilization: 60
+          type: Utilization
+      type: Resource
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      name: reposilite-unittest
+      namespace: testing
+  - equal:
+      path: metadata.annotations
+      value:
+        foo: bar
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        bar: foo
+        helm.sh/chart: reposilite-0.1.0
+  - contains:
+      path: spec.metrics
+      content:
+        resource:
+          name: cpu
+          target:
+            averageUtilization: 60
+            type: Utilization
+        type: Resource
+  - contains:
+      path: spec.metrics
+      content:
+        resource:
+          name: memory
+          target:
+            averageUtilization: 60
+            type: Utilization
+        type: Resource
+  - equal:
+      path: spec.maxReplicas
+      value: 25
+  - equal:
+      path: spec.minReplicas
+      value: 5
+  - equal:
+      path: spec.scaleTargetRef
+      value:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: reposilite-unittest

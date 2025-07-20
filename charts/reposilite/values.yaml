@@ -92,31 +92,47 @@ services:
     sessionAffinityConfig: {}
     type: "ClusterIP"
 
-## HorizontalPodAutoscaler configuration.
-autoscaling:
+## @section Horizontal Pod Autoscaler (HPA)
+# In order for the HPA to function successfully, a metric server is required, especially for resource consumption. The
+# metric server enables the CPU and memory utilisation to be recorded. If such a metric server is not available, the HPA
+# cannot scale pods based on CPU or memory utilisation. Further information be be found here:
+# https://github.com/kubernetes-sigs/metrics-server#deployment
+hpa:
+  ## @param hpa.enabled Enable the horizontal pod autoscaler (HPA).
+  ## @param hpa.annotations Additional annotations for the HPA.
+  ## @param hpa.labels Additional labels for the HPA.
+  ## @param.hpa.behavior.scaleDown Scaling policy for scaling down.
+  ## @skip.hpa.behavior.scaleDown.policies Skip individual scale down policies.
+  ## @skip.hpa.behavior.scaleDown.stabilizationWindowSeconds Skip individual stabilizationWindowSeconds.
+  ## @param hpa.metrics Metrics contains the specifications for which to use to calculate the desired replica count.
+  ## @skip hpa.metrics Skip individual HPA metric configurations.
+  ## @param hpa.minReplicas Min replicas is the lower limit for the number of replicas to which the autoscaler can scale down.
+  ## @param hpa.maxReplicas Upper limit for the number of pods that can be set by the autoscaler.
   enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 60
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 60
+  annotations: {}
+  labels: {}
   behavior:
-   scaleDown:
-    stabilizationWindowSeconds: 300
-    policies:
+    scaleDown:
+      policies:
       - type: Pods
         value: 1
         periodSeconds: 60
+      stabilizationWindowSeconds: 300
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 65
+        type: Utilization
+    type: Resource
+  - resource:
+      name: memory
+      target:
+        averageUtilization: 65
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  maxReplicas: 10
 
 ## If you would like to create an ingress for Reposilite's frontend, you can enable it here.
 ## Please refer to your ingress provider's documentation for configuration that may be specific
@@ -172,7 +188,7 @@ resources:
   limits:
     cpu: 2.0
     memory: 256Mi
-    
+
 ## Environment variables
 env:
   - name: JAVA_OPTS
