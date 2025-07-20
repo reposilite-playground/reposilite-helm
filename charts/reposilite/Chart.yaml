@@ -1,11 +1,9 @@
 apiVersion: v2
-name: reposilite
-version: "1.3.23" # The version of this chart.
-appVersion: "3.5.25" # The latest version of Reposilite.
-description: "Lightweight and easy-to-use repository management software dedicated for the Maven based artifacts in the JVM ecosystem"
+appVersion: "3.5.25"
+description: "Lightweight and easy-to-use repository management software
+  dedicated for the Maven based artifacts in the JVM ecosystem"
 icon: https://raw.githubusercontent.com/dzikoysk/reposilite/main/reposilite-site/public/images/favicon.png
-type: application
-keywords: # A list of keywords for Reposilite.
+keywords:
   - reposilite
   - maven
   - gradle
@@ -13,10 +11,16 @@ keywords: # A list of keywords for Reposilite.
   - deploy
   - artifact-repository-manager
   - repository-manager
-sources: # A list of URLs to the source code of Reposilite.
+maintainers:
+  - email: dzikoysk@dzikoysk.net
+    name: dzikoysk
+    url: https://github.com/dzikoysk
+  - email: me@volker-raschek.de
+    name: Volker Raschek
+    url: https://github.com/volker-raschek
+name: reposilite
+sources:
   - https://github.com/dzikoysk/reposilite
   - https://github.com/reposilite-playground/reposilite-helm
-maintainers: # A list of Chart maintainers
-  - name: dzikoysk
-    email: dzikoysk@dzikoysk.net
-    url: https://github.com/dzikoysk
+type: application
+version: "1.3.23"
