@@ -401,17 +401,17 @@ tests:
 - it: Test tolerations
   set:
     deployment.tolerations:
-    - key: database/type
+    - key: hdd/type
       operator: Equal
-      value: postgres
+      value: ssd
       effect: NoSchedule
   asserts:
   - equal:
       path: spec.template.spec.tolerations
       value:
-      - key: database/type
+      - key: hdd/type
         operator: Equal
-        value: postgres
+        value: ssd
         effect: NoSchedule
 
 - it: Test topologySpreadConstraints
@@ -445,4 +445,3 @@ tests:
       - name: data
         hostPath:
           path: /usr/lib/data
-

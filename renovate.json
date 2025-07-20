@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>volker.raschek/renovate-config:default#master",
+    "local>volker.raschek/renovate-config:container#master",
+    "local>volker.raschek/renovate-config:actions#master",
+    "local>volker.raschek/renovate-config:npm#master",
+    "local>volker.raschek/renovate-config:regexp#master"
+  ],
+  "customManagers": [
+    {
+      "fileMatch": [
+        "^Chart\\.yaml$"
+      ],
+      "matchStrings": [
+        "appVersion: \"(?<currentValue>.*?)\"\\s+"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "dzikoysk/reposilite",
+      "lookupNameTemplate": "docker/dzikoysk/reposilite",
+      "versioningTemplate": "semver"
+    },
+    {
+      "fileMatch": ["^README\\.md$"],
+      "matchStrings": [
+        "CHART_VERSION=(?<currentValue>.*)"
+      ],
+      "depNameTemplate": "dzikoysk/reposilite",
+      "packageNameTemplate": "https://github.com/dzikoysk/reposilite",
+      "datasourceTemplate": "git-tags",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "addLabels": [
+        "renovate/automerge",
+        "renovate/documentation"
+      ],
+      "automerge": true,
+      "matchDepNames": [
+        "dzikoysk/reposilite"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ]
+    }
+  ]
+}

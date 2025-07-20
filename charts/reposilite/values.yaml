@@ -19,7 +19,7 @@ deployment:
   #   image: "docker.io/library/busybox:latest"
   #   name: side-car
 
-  ## @param deployment.affinity Affinity for the reposilite deployment.
+  ## @param deployment.affinity Affinity for the Reposilite deployment.
   affinity: {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -44,7 +44,7 @@ deployment:
   #   image: "docker.io/library/busybox:latest"
   #   name: init
 
-  ## @param deployment.dnsConfig dnsConfig of the reposilite deployment.
+  ## @param deployment.dnsConfig dnsConfig of the Reposilite deployment.
   dnsConfig: {}
     # nameservers:
     # - 192.0.2.1 # this is an example
@@ -56,7 +56,7 @@ deployment:
     #   value: "2"
     # - name: edns0
 
-  ## @param deployment.dnsPolicy dnsPolicy of the reposilite deployment.
+  ## @param deployment.dnsPolicy dnsPolicy of the Reposilite deployment.
   dnsPolicy: ""
 
   ## @param deployment.hostname Individual hostname of the pod.
@@ -72,18 +72,18 @@ deployment:
   # - name: "my-custom-secret"
 
   reposilite:
-    ## @param deployment.reposilite.args Arguments passed to the reposilite container.
+    ## @param deployment.reposilite.args Arguments passed to the Reposilite container.
     args: []
     # - "-c"
     # - "echo HelloWorld"
 
-    ## @param deployment.reposilite.command COmmand passed to the reposilite container.
+    ## @param deployment.reposilite.command Command passed to the Reposilite container.
     command: []
     # - "/bin/bash"
 
-    ## @param deployment.reposilite.env List of environment variables for the reposilite container.
-    ## @param deployment.reposilite.env[0].name JAVA_OPTS: Environment variable to define custom java options.
-    ## @param deployment.reposilite.env[0].value Set custom java options. Use `-Xmx64M` to reduce the heap of the JVM.
+    ## @extra deployment.reposilite.env List of environment variables for the Reposilite container.
+    ## @skip deployment.reposilite.env[0].name JAVA_OPTS: Environment variable to define custom java options.
+    ## @skip deployment.reposilite.env[0].value Set custom java options. Use `-Xmx64M` to reduce the heap of the JVM.
     env:
     - name: JAVA_OPTS
       value: "-Xmx64M"
@@ -100,7 +100,7 @@ deployment:
     #       name: special-secret
     #       key: special-key
 
-    ## @param deployment.reposilite.envFrom List of environment variables mounted from configMaps or secrets for the reposilite container.
+    ## @param deployment.reposilite.envFrom List of environment variables mounted from configMaps or secrets for the Reposilite container.
     envFrom: []
     # - configMapRef:
     #     name: special-config
@@ -146,19 +146,19 @@ deployment:
     #   mountPath: /configmap
     #   readOnly: true
 
-  ## @param deployment.nodeSelector NodeSelector of the reposilite deployment.
+  ## @param deployment.nodeSelector NodeSelector of the Reposilite deployment.
   nodeSelector: {}
 
-  ## @param deployment.priorityClassName PriorityClassName of the reposilite deployment.
+  ## @param deployment.priorityClassName PriorityClassName of the Reposilite deployment.
   priorityClassName: ""
 
-  ## @param deployment.replicas Number of replicas for the reposilite deployment.
+  ## @param deployment.replicas Number of replicas for the Reposilite deployment.
   replicas: 1
 
-  ## @param deployment.restartPolicy Restart policy of the reposilite deployment.
+  ## @param deployment.restartPolicy Restart policy of the Reposilite deployment.
   restartPolicy: ""
 
-  ## @param deployment.securityContext Security context of the reposilite deployment.
+  ## @param deployment.securityContext Security context of the Reposilite deployment.
   securityContext: {}
     # fsGroup: 2000
 
@@ -174,14 +174,14 @@ deployment:
   ## @param deployment.terminationGracePeriodSeconds How long to wait until forcefully kill the pod.
   terminationGracePeriodSeconds: 60
 
-  ## @param deployment.tolerations Tolerations of the reposilite deployment.
+  ## @param deployment.tolerations Tolerations of the Reposilite deployment.
   tolerations: []
   # - key: host.kubernetes.io/ssd
   #   operator: Equal
   #   value: "true"
   #   effect: NoSchedule
 
-  ## @param deployment.topologySpreadConstraints TopologySpreadConstraints of the reposilite deployment.
+  ## @param deployment.topologySpreadConstraints TopologySpreadConstraints of the Reposilite deployment.
   topologySpreadConstraints: []
   # - topologyKey: kubernetes.io/hostname
   #   whenUnsatisfiable: DoNotSchedule
@@ -208,9 +208,9 @@ hpa:
   ## @param hpa.enabled Enable the horizontal pod autoscaler (HPA).
   ## @param hpa.annotations Additional annotations for the HPA.
   ## @param hpa.labels Additional labels for the HPA.
-  ## @param.hpa.behavior.scaleDown Scaling policy for scaling down.
-  ## @skip.hpa.behavior.scaleDown.policies Skip individual scale down policies.
-  ## @skip.hpa.behavior.scaleDown.stabilizationWindowSeconds Skip individual stabilizationWindowSeconds.
+  ## @extra hpa.behavior.scaleDown Scaling policy for scaling down.
+  ## @skip hpa.behavior.scaleDown.policies Skip individual scale down policies.
+  ## @skip hpa.behavior.scaleDown.stabilizationWindowSeconds Skip individual stabilizationWindowSeconds.
   ## @param hpa.metrics Metrics contains the specifications for which to use to calculate the desired replica count.
   ## @skip hpa.metrics Skip individual HPA metric configurations.
   ## @param hpa.minReplicas Min replicas is the lower limit for the number of replicas to which the autoscaler can scale down.
@@ -269,7 +269,7 @@ ingress:
   #      - chart-example.local
 
 
-## @section networkPolicy
+## @section Network Policy
 networkPolicy:
   ## @param networkPolicy.enabled Enable network policies in general.
   ## @param networkPolicy.annotations Additional network policy annotations.
@@ -329,7 +329,7 @@ networkPolicy:
   #     protocol: TCP
 
 
-## @section networkPolicy
+## @section Persistent Volume Claim
 persistentVolumeClaim:
   ## @param persistentVolumeClaim.enabled Enable persistence in general.
   ## @param persistentVolumeClaim.path Path where the persistent volume claim should be mounted into the container file system.
@@ -345,6 +345,7 @@ persistentVolumeClaim:
   ## @param persistentVolumeClaim.new.annotations Additional service account annotations.
   ## @param persistentVolumeClaim.new.labels Additional service account labels.
   ## @param persistentVolumeClaim.new.accessMode Access mode of the persistent volume claim. More information about the access modes are in detail documented [online](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
+  ## @param persistentVolumeClaim.new.size Size of the persistent volume claim.
   ## @param persistentVolumeClaim.new.storageClass Custom storage class. Left it empty to use the clusters default storage class.
   new:
     annotations: {}
