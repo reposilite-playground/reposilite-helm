@@ -16,12 +16,12 @@ tests:
       path: spec.template.spec.containers[0].env
       content:
         name: REPOSILITE_DATA
-        value: /var/lib/reposilite/data
+        value: /app/data
   - contains:
       path: spec.template.spec.containers[0].volumeMounts
       content:
         name: data
-        mountPath: /var/lib/reposilite/data
+        mountPath: /app/data
   - contains:
       path: spec.template.spec.volumes
       content:

@@ -334,7 +334,7 @@ persistentVolumeClaim:
   ## @param persistentVolumeClaim.enabled Enable persistence in general.
   ## @param persistentVolumeClaim.path Path where the persistent volume claim should be mounted into the container file system.
   enabled: false
-  path: /var/lib/reposilite/data
+  path: /app/data
 
   ## @param persistentVolumeClaim.existing.enabled Enable an existing persistent volume claim.
   ## @param persistentVolumeClaim.existing.persistentVolumeClaimName Name of the existing persistent volume claim.
