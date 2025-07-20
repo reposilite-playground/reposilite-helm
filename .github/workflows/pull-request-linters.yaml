@@ -1,0 +1,51 @@
+name: "Lint PR"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+
+jobs:
+  main:
+    name: "Validate PR title"
+    runs-on: docker
+    permissions:
+      pull-requests: read
+    steps:
+    - env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # Configure which types are allowed (newline-delimited).
+        # Default: https://github.com/commitizen/conventional-commit-types
+        # types: |
+        #   fix
+        #   feat
+
+        # Examples:
+        # fix(backend): adapt /u/qu-seed/resources/internal/examples
+        # docs(README): add missing documentation about environment variables
+        headerPattern: '^(?<type>\w*)(?<scope>\(([\w$.\-*\/ ]*)\))?: (?<subject>.*)$'
+        headerPatternCorrespondence: type, scope, subject
+
+        # Configure which scopes are allowed (newline-delimited).
+        # These are regex patterns auto-wrapped in `^ $`.
+        # scopes: |
+        #   core
+        #   ui
+        #   JIRA-\d+
+
+        # Avoid uppercase characters
+        subjectPattern: ^(?:\[[\w*\-]* \/fixed\] )?(?![A-Z]).+$
+
+        # Throw error message, if subject is not compliant
+        subjectPatternError: |
+          The subject "{subject}" found in the pull request title "{title}"
+          didn't match the configured pattern. Please ensure that the subject
+          doesn't start with an uppercase character.
+
+        # Ensure, that a scope is present
+        requireScope: true
+
+      uses: amannn/action-semantic-pull-request@v5.5.3
