@@ -231,6 +231,31 @@ service:
   sessionAffinityConfig: {}
   type: "ClusterIP"
 
+
+## @section ServiceAccount
+serviceAccount:
+  ## @param serviceAccount.existing.enabled Use an existing service account instead of creating a new one. Assumes that the user has all the necessary kubernetes API authorizations.
+  ## @param serviceAccount.existing.serviceAccountName Name of the existing service account.
+  existing:
+    enabled: false
+    serviceAccountName: ""
+
+  ## @param serviceAccount.new.annotations Additional service account annotations.
+  ## @param serviceAccount.new.labels Additional service account labels.
+  ## @param serviceAccount.new.automountServiceAccountToken Enable/disable auto mounting of the service account token.
+  ## @param serviceAccount.new.imagePullSecrets ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images in pods that reference this serviceAccount.
+  ## @param serviceAccount.new.secrets Secrets is the list of secrets allowed to be used by pods running using this ServiceAccount.
+  new:
+    annotations: {}
+    labels: {}
+    automountServiceAccountToken: true
+    imagePullSecrets: []
+    # - name: "my-image-pull-secret"
+    secrets: []
+    # - name: "my-secret"
+    #   namespace: "my-namespace"
+    #   fieldPath: "my-field"
+
 ## Resources
 resources:
   requests:
@@ -282,23 +307,3 @@ persistence:
 # existingClaim: "" # Use this if you already have an existing PVC for Reposilite.
   path: /app/data
 # subPath: "" # Only mount a subdirectory of the Volume to the pod.
-
-## Service account
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-  automountServiceAccountToken: false
-
-## Pod affinity
-affinity: {}
-
-## Pod node selector
-nodeSelector: {}
-
-## Pod tolerations
-tolerations: []
