@@ -1,6 +1,6 @@
 # Reposilite
 
-[![Artifact Hub](https://artifacthub.io/packages/helm/reposilite/reposilite)]
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/reposilite)](https://artifacthub.io/packages/search?repo=reposilite)
 
 This helm chart enables the deployment of [Reposilite](https://github.com/dzikoysk/reposilite), a lightweight and
 easy-to-use repository management software dedicated for the Maven-based artifacts in the JVM ecosystem.
