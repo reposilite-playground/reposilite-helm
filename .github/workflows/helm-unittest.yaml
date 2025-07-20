@@ -21,4 +21,4 @@ jobs:
         helm plugin install --version "${HELM_UNITTEST_VERSION}" https://github.com/helm-unittest/helm-unittest.git
     - name: "Run Helm Unittests"
       run: |
-        helm unittest --strict --file charts/reposilite/unittests/**/*.yaml charts/reposilite
+        helm unittest --strict --file 'charts/reposilite/unittests/**/*.yaml' charts/reposilite
