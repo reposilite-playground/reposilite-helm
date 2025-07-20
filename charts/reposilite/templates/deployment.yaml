@@ -16,10 +16,16 @@ spec:
   selector:
     matchLabels:
       {{- include "reposilite.pod.selectorLabels" . | nindent 6 }}
+  {{- with .Values.deployment.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
+      {{- with (include "reposilite.pod.annotations" . | fromYaml) }}
       annotations:
-        {{- include "reposilite.pod.annotations" . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "reposilite.pod.labels" . | nindent 8 }}
     spec:
@@ -28,8 +34,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - name: reposilite
-        {{- if gt (len .Values.deployment.reposilite.args) 0 }}
+      - {{- if gt (len .Values.deployment.reposilite.args) 0 }}
         args:
         {{- range .Values.deployment.reposilite.args }}
         - {{ . | quote }}
@@ -53,24 +58,25 @@ spec:
         imagePullPolicy: {{ .Values.deployment.reposilite.image.pullPolicy }}
         livenessProbe:
           tcpSocket:
-            port: 9187
+            port: http
           failureThreshold: 3
           initialDelaySeconds: 5
           periodSeconds: 60
           successThreshold: 1
           timeoutSeconds: 3
+        name: reposilite
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
         readinessProbe:
           tcpSocket:
-            port: 9187
+            port: http
           failureThreshold: 3
           initialDelaySeconds: 5
           periodSeconds: 15
           successThreshold: 1
           timeoutSeconds: 3
-        ports:
-        - name: http
-          containerPort: 8080
-          protocol: TCP
         {{- with .Values.deployment.reposilite.resources }}
         resources:
           {{- toYaml . | nindent 10 }}
@@ -129,7 +135,3 @@ spec:
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- with .Values.deployment.strategy }}
-  strategy:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}

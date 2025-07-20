@@ -31,6 +31,21 @@ tests:
   - equal:
       path: spec.replicas
       value: 1
+  - isSubset:
+      path: spec.selector.matchLabels
+      content:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/name: reposilite
+  - equal:
+      path: spec.strategy
+      value:
+        type: "RollingUpdate"
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 1
+  - notExists:
+      path: spec.template.metadata.annotations
+      value: sadsdf
   - equal:
       path: spec.template.metadata.labels
       value:
@@ -46,13 +61,44 @@ tests:
   - notExists:
       path: spec.template.spec.containers[0].command
   - notExists:
-      path: spec.template.spec.volumes
+      path: spec.template.spec.containers[0].env
+  - notExists:
+      path: spec.template.spec.containers[0].envFrom
   - equal:
       path: spec.template.spec.containers[0].image
       value: docker.io/dzikoysk/reposilite:0.1.0
   - equal:
       path: spec.template.spec.containers[0].imagePullPolicy
       value: IfNotPresent
+  - isSubset:
+      path: spec.template.spec.containers[0].livenessProbe
+      content:
+        tcpSocket:
+          port: http
+        failureThreshold: 3
+        initialDelaySeconds: 5
+        periodSeconds: 60
+        successThreshold: 1
+        timeoutSeconds: 3
+  - equal:
+      path: spec.template.spec.containers[0].name
+      value: reposilite
+  - contains:
+      path: spec.template.spec.containers[0].ports
+      content:
+        name: http
+        containerPort: 8080
+        protocol: TCP
+  - isSubset:
+      path: spec.template.spec.containers[0].readinessProbe
+      content:
+        tcpSocket:
+          port: http
+        failureThreshold: 3
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 3
   - notExists:
       path: spec.template.spec.containers[0].resources
   - notExists:
@@ -87,13 +133,8 @@ tests:
       path: spec.template.spec.tolerations
   - notExists:
       path: spec.template.spec.topologySpreadConstraints
-  - equal:
-      path: spec.strategy
-      value:
-        type: "RollingUpdate"
-        rollingUpdate:
-          maxSurge: 1
-          maxUnavailable: 1
+  - notExists:
+      path: spec.template.spec.volumes
 
 - it: Test custom replicas
   set:
@@ -102,6 +143,22 @@ tests:
   - equal:
       path: spec.replicas
       value: 3
+
+- it: Test custom strategy
+  set:
+    deployment.strategy:
+      type: "RollingUpdate"
+      rollingUpdate:
+        maxSurge: 10
+        maxUnavailable: 5
+  asserts:
+  - equal:
+      path: spec.strategy
+      value:
+        type: "RollingUpdate"
+        rollingUpdate:
+          maxSurge: 10
+          maxUnavailable: 5
 
 - it: Test custom affinity
   set:
@@ -141,14 +198,25 @@ tests:
       - --foo=bar
       - --bar=foo
 
+- it: Test additional commands
+  set:
+    deployment.reposilite.command:
+    - "/bin/bash"
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].command
+      value:
+      - /bin/bash
+
 - it: Test custom imageRegistry and imageRepository
   set:
     deployment.reposilite.image.registry: registry.example.local
     deployment.reposilite.image.repository: path/special/reposilite
+    deployment.reposilite.image.tag: 2.0.0
   asserts:
   - equal:
       path: spec.template.spec.containers[0].image
-      value: registry.example.local/path/special/reposilite:0.1.0
+      value: registry.example.local/path/special/reposilite:2.0.0
 
 - it: Test custom imagePullPolicy
   set:
@@ -158,7 +226,18 @@ tests:
       path: spec.template.spec.containers[0].imagePullPolicy
       value: Always
 
-- it: Test custom resource limits and requests
+- it: Test custom port
+  set:
+    service.port: 8443
+  asserts:
+  - contains:
+      path: spec.template.spec.containers[0].ports
+      content:
+        name: http
+        containerPort: 8443
+        protocol: TCP
+
+- it: Test custom resources
   set:
     deployment.reposilite.resources:
       limits:
@@ -203,6 +282,18 @@ tests:
         readOnlyRootFilesystem: true
         runAsNonRoot: true
         runAsUser: 1000
+
+- it: Test custom volumeMounts
+  set:
+    deployment.reposilite.volumeMounts:
+      - name: data
+        mountPath: /usr/lib/data
+  asserts:
+  - contains:
+      path: spec.template.spec.containers[0].volumeMounts
+      content:
+        name: data
+        mountPath: /usr/lib/data
 
 - it: Test dnsConfig
   set:
@@ -280,6 +371,22 @@ tests:
       path: spec.template.spec.restartPolicy
       value: Always
 
+- it: Test custom securityContext
+  set:
+    deployment.securityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+  asserts:
+  - equal:
+      path: spec.template.spec.securityContext
+      value:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+
 - it: Test terminationGracePeriodSeconds
   set:
     deployment.terminationGracePeriodSeconds: 120
@@ -322,21 +429,13 @@ tests:
           matchLabels:
             app.kubernetes.io/instance: reposilite
 
-- it: Test additional volumeMounts and volumes
+- it: Test additional volumes
   set:
-    deployment.reposilite.volumeMounts:
-    - name: data
-      mountPath: /usr/lib/data
     deployment.volumes:
     - name: data
       hostPath:
         path: /usr/lib/data
   asserts:
-  - equal:
-      path: spec.template.spec.containers[0].volumeMounts
-      value:
-      - name: data
-        mountPath: /usr/lib/data
   - equal:
       path: spec.template.spec.volumes
       value:
