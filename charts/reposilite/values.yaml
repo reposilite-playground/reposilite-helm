@@ -169,9 +169,9 @@ deployment:
 
   ## @param deployment.tolerations Tolerations of the reposilite deployment.
   tolerations: []
-  # - key: database/type
+  # - key: host.kubernetes.io/ssd
   #   operator: Equal
-  #   value: postgres
+  #   value: "true"
   #   effect: NoSchedule
 
   ## @param deployment.topologySpreadConstraints TopologySpreadConstraints of the reposilite deployment.

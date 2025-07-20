@@ -66,10 +66,10 @@ tests:
     - to:
       - namespaceSelector:
           matchLabels:
-            kubernetes.io/metadata.name: database
+            kubernetes.io/metadata.name: ingress-nginx
         podSelector:
           matchLabels:
-            app.kubernetes.io/name: postgres
+            app.kubernetes.io/name: ingress-nginx
   asserts:
   - equal:
       path: spec.policyTypes
@@ -82,10 +82,10 @@ tests:
       - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: database
+              kubernetes.io/metadata.name: ingress-nginx
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: postgres
+              app.kubernetes.io/name: ingress-nginx
   - equal:
       path: spec.ingress
       value:
