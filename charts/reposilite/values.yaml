@@ -218,23 +218,6 @@ rollingUpdate:
   maxUnavailable: 0
   maxSurge: 1
 
-## Readiness and liveness probes
-probes:
-  port: 8080 # The port Reposilite is running on inside the pod.
-  scheme: "HTTP" # Scheme to use in GET requests.
-  readiness:
-    initialDelaySeconds: 2
-    periodSeconds: 10
-    timeoutSeconds: 1
-    successThreshold: 1
-    failureThreshold: 1
-  liveness:
-    initialDelaySeconds: 2
-    periodSeconds: 10
-    timeoutSeconds: 2
-    successThreshold: 1
-    failureThreshold: 3
-
 ## Persistent Volume Claim
 ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 ## RECOMMENDED: This is required to persist configuration changes and artifacts!
