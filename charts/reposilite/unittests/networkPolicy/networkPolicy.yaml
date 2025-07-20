@@ -1,0 +1,98 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: networkPolicy template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/networkPolicy.yaml
+tests:
+- it: Skip rendering networkPolicy
+  set:
+    networkPolicy.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Render default networkPolicy
+  set:
+    networkPolicy.enabled: true
+  asserts:
+  - hasDocuments:
+      count:  1
+  - containsDocument:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      name: reposilite-unittest
+      namespace: testing
+  - notExists:
+      path: metadata.annotations
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - equal:
+      path: spec.podSelector.matchLabels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/name: reposilite
+  - notExists:
+      path: spec.policyTypes
+  - notExists:
+      path: spec.egress
+  - notExists:
+      path: spec.ingress
+
+- it: Template networkPolicy with policyTypes, egress and ingress configuration
+  set:
+    networkPolicy.enabled: true
+    networkPolicy.policyTypes:
+    - Egress
+    - Ingress
+    networkPolicy.ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: prometheus
+    networkPolicy.egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: database
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: postgres
+  asserts:
+  - equal:
+      path: spec.policyTypes
+      value:
+      - Egress
+      - Ingress
+  - equal:
+      path: spec.egress
+      value:
+      - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres
+  - equal:
+      path: spec.ingress
+      value:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus

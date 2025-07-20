@@ -141,6 +141,65 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+## @section networkPolicy
+networkPolicy:
+  ## @param networkPolicy.enabled Enable network policies in general.
+  ## @param networkPolicy.annotations Additional network policy annotations.
+  ## @param networkPolicy.labels Additional network policy labels.
+  ## @param networkPolicy.policyTypes List of policy types. Supported is ingress, egress or ingress and egress.
+  ## @param networkPolicy.egress Concrete egress network policy implementation.
+  ## @skip networkPolicy.egress Skip individual egress configuration.
+  ## @param networkPolicy.ingress Concrete ingress network policy implementation.
+  ## @skip networkPolicy.ingress Skip individual ingress configuration.
+  enabled: false
+  annotations: {}
+  labels: {}
+  policyTypes: []
+  # - Egress
+  # - Ingress
+  egress: []
+  # Allow outgoing DNS traffic to the internal running DNS-Server. For example core-dns.
+  #
+  # - to:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: kube-system
+  #     podSelector:
+  #       matchLabels:
+  #        k8s-app: kube-dns
+  #   ports:
+  #   - port: 53
+  #     protocol: TCP
+  #   - port: 53
+  #     protocol: UDP
+
+  ingress: []
+  # Allow incoming HTTP traffic from prometheus.
+  #
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: monitoring
+  #     podSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: prometheus
+  #   ports:
+  #   - port: http
+  #     protocol: TCP
+
+  # Allow incoming HTTP traffic from ingress-nginx.
+  #
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: ingress-nginx
+  #     podSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: ingress-nginx
+  #   ports:
+  #   - port: http
+  #     protocol: TCP
+
 ## @section Service
 ## @param service.enabled Enable the service.
 ## @param service.annotations Additional service annotations.
