@@ -1,131 +1,135 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "reposilite.fullname" . }}
+  {{- with (include "reposilite.deployment.annotations" . | fromYaml) }}
   annotations:
-  {{- with .Values.deployment.annotations }}
-    {{- toYaml . | nindent 4 }}
+    {{- tpl (toYaml .) $ | nindent 4 }}
   {{- end }}
+  {{- with (include "reposilite.deployment.labels" . | fromYaml) }}
   labels:
-  {{- include "reposilite.labels" . | nindent 4 -}}
-  {{- with .Values.deployment.labels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  name: {{ include "reposilite.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  {{- if not .Values.hpa.enabled }}
-  replicas: {{ default 1 .Values.deployment.replicas }}
-  {{- end }}
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      {{- include "reposilite.selectorLabels" . | nindent 6 }}
-  strategy:
-    type: RollingUpdate
-    {{- with .Values.rollingUpdate }}
-    rollingUpdate:
-      {{- toYaml . | nindent 8 }}
-    {{- end }}
-  minReadySeconds: {{ .Values.deployment.minReadySeconds }}
+      {{- include "reposilite.pod.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
-      {{- with .Values.deployment.podAnnotations }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "reposilite.pod.annotations" . | nindent 8 }}
       labels:
-      {{- include "reposilite.labels" . | nindent 8 -}}
-      {{- with .Values.deployment.podLabels }}
-        {{- toYaml . | nindent 8 }}
-      {{- end}}
+        {{- include "reposilite.pod.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.deployment.imagePullSecrets }}
-      imagePullSecrets:
+      {{- with .Values.deployment.affinity }}
+      affinity:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "reposilite.serviceAccountName" . }}
-      terminationGracePeriodSeconds: {{ default 60 .Values.deployment.terminationGracePeriodSeconds }}
-      {{- if .Values.deployment.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.deployment.podSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
-      {{- with .Values.deployment.initContainers }}
-      initContainers:
-        {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:
-      - name: {{ template "reposilite.fullname" . }}
-        image: "{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        stdin: true
-        {{- with .Values.resources }}
-        resources:
+      - name: reposilite
+        {{- if gt (len .Values.deployment.reposilite.args) 0 }}
+        args:
+        {{- range .Values.deployment.reposilite.args }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if gt (len .Values.deployment.reposilite.command) 0 }}
+        command:
+        {{- range .Values.deployment.reposilite.command }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.deployment.reposilite.env }}
+        env:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        readinessProbe:
-          tcpSocket:
-            port: http
-          failureThreshold: 3
-          initialDelaySeconds: 5
-          periodSeconds: 15
-          successThreshold: 1
-          timeoutSeconds: 3
+        {{- with .Values.deployment.reposilite.envFrom }}
+        envFrom:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        image: {{ include "reposilite.deployment.images.reposilite.fqin" . | quote }}
+        imagePullPolicy: {{ .Values.deployment.reposilite.image.pullPolicy }}
         livenessProbe:
           tcpSocket:
-            port: http
+            port: 9187
           failureThreshold: 3
           initialDelaySeconds: 5
           periodSeconds: 60
           successThreshold: 1
           timeoutSeconds: 3
-        {{- with .Values.deployment.lifecycle}}
-        lifecycle:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
+        readinessProbe:
+          tcpSocket:
+            port: 9187
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 3
         ports:
-        - name: "http"
-          containerPort: {{ required "No pod port defined!" .Values.service.port }}
+        - name: http
+          containerPort: 8080
           protocol: TCP
+        {{- with .Values.deployment.reposilite.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.deployment.reposilite.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.deployment.reposilite.volumeMounts }}
         volumeMounts:
-          - name: {{ .Values.persistence.name }}
-            mountPath: {{ .Values.persistence.path }}
-            {{- if .Values.persistence.subPath }}
-            subPath: {{ .Values.persistence.subPath }}
-            {{- end }}
-          {{- if .Values.deployment.additionalVolumeMounts }}
-          {{- toYaml .Values.deployment.additionalVolumeMounts | nindent 10 }}
-          {{- end }}
-        {{- with .Values.env }}
-        env:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.envFrom }}
-        envFrom:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- if .Values.deployment.containerSecurityContext.enabled }}
-        securityContext: {{- omit .Values.deployment.containerSecurityContext "enabled" | toYaml | nindent 10 }}
-        {{- end }}
-      {{- if .Values.deployment.additionalContainers }}
-        {{- toYaml .Values.deployment.additionalContainers | nindent 6 }}
-      {{- end }}
-      volumes:
-        - name: {{ .Values.persistence.name }}
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ default (include "reposilite.fullname" .) .Values.persistence.existingClaim }}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-        {{- if .Values.deployment.additionalVolumes }}
-          {{- toYaml .Values.deployment.additionalVolumes | nindent 8 }}
-        {{- end }}
-      {{- if .Values.affinity }}
-      affinity:
-        {{- tpl (toYaml .Values.affinity) . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
+      {{- with .Values.deployment.dnsConfig }}
+      dnsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.nodeSelector }}
+      {{- if .Values.deployment.dnsPolicy }}
+      dnsPolicy: {{ .Values.deployment.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.deployment.hostname }}
+      hostname: {{ .Values.deployment.hostname }}
+      {{- end }}
+      hostNetwork: {{ .Values.deployment.hostNetwork }}
+      {{- with .Values.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.deployment.priorityClassName }}
+      priorityClassName: {{ .Values.deployment.priorityClassName }}
+      {{- end }}
+      {{- if .Values.deployment.restartPolicy }}
+      restartPolicy: {{ .Values.deployment.restartPolicy }}
+      {{- end }}
+      {{- with .Values.deployment.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccount: {{ include "reposilite.deployment.serviceAccount" . }}
+      {{- if .Values.deployment.subdomain }}
+      subdomain: {{ .Values.deployment.subdomain }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.deployment.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.deployment.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- with .Values.deployment.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}

@@ -1,7 +1,7 @@
 chart:
   appVersion: 0.1.0
   version: 0.1.0
-suite: networkPolicy template
+suite: NetworkPolicy template
 release:
   name: reposilite-unittest
   namespace: testing

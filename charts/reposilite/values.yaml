@@ -1,77 +1,196 @@
-## Default values for reposilite.
-image:
-  name: docker.io/dzikoysk/reposilite
-  tag: "" # defaults to appVersion
-  pullPolicy: IfNotPresent
+# Declare variables to be passed into your templates.
 
-## Name overrides
+## @section Global
+## @param nameOverride Individual release name suffix.
+## @param fullnameOverride Override the complete release name logic.
 nameOverride: ""
 fullnameOverride: ""
 
-## Deployment configuration
+## @section Deployment
 deployment:
-  # Number of replicas to be deployed.
-  replicas: 1
-  # Time in seconds before Kubernetes sends a SIGKILL signal if Reposilite doesn't gracefully shut down.
-  terminationGracePeriodSeconds: 60
-  # The minimum time in seconds Reposilite needs to be running before the Deployment controller considers it available.
-  minReadySeconds: 0
-  # Additional annotations to be added to the Deployment
+  ## @param deployment.annotations Additional deployment annotations.
+  ## @param deployment.labels Additional deployment labels.
   annotations: {}
-  # Additional labels to be added to the Deployment
   labels: {}
-  # Additional annotations to be added to pods
-  podAnnotations: {}
-  # Additional labels to be added to pods
-  podLabels: {}
-  # Init containers
-  initContainers: []
-    # - name: name
-    #   image: alpine
-    #   args: []
-    #   volumeMounts:
-    #     - name: volume-name
-    #       mountPath: /data
-  # Additional containers
+
+  ## @param deployment.additionalContainers List of additional containers.
   additionalContainers: []
-    # - name: name
-    #   image: alpine
-    #   args: []
-    #   volumeMounts:
-    #     - name: volume-name
-    #       mountPath: /data
-  # Additional volumes for use with initContainers, additionalContainers and runtime container itself
-  additionalVolumes: []
-    # - name: name
-    #   hostPath:
-    #     path: /tmp
-    # - name: logging
-    #   emptyDir: {}
-  # Additional mount points for the runtime container. Refer to volumes defined in `additionalVolumes`.
-  additionalVolumeMounts: []
-    # - name: logging
-    #   mountPath: /var/log/reposilite/
-  # Image pull secrets
+  # - command: [ "sh", "-c", "echo hello world" ]
+  #   image: "docker.io/library/busybox:latest"
+  #   name: side-car
+
+  ## @param deployment.affinity Affinity for the reposilite deployment.
+  affinity: {}
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #     - matchExpressions:
+    #       - key: kubernetes.io/os
+    #         operator: In
+    #         values:
+    #         - linux
+    #   preferredDuringSchedulingIgnoredDuringExecution:
+    #   - weight: 20
+    #     preference:
+    #       matchExpressions:
+    #       - key: kubernetes.io/arch
+    #         operator: In
+    #         values:
+    #         - amd64
+
+  ## @param deployment.initContainers List of additional init containers.
+  initContainers: []
+  # - command: [ "sh", "-c", "echo hello world" ]
+  #   image: "docker.io/library/busybox:latest"
+  #   name: init
+
+  ## @param deployment.dnsConfig dnsConfig of the reposilite deployment.
+  dnsConfig: {}
+    # nameservers:
+    # - 192.0.2.1 # this is an example
+    # searches:
+    # - ns1.svc.cluster-domain.example
+    # - my.dns.search.suffix
+    # options:
+    # - name: ndots
+    #   value: "2"
+    # - name: edns0
+
+  ## @param deployment.dnsPolicy dnsPolicy of the reposilite deployment.
+  dnsPolicy: ""
+
+  ## @param deployment.hostname Individual hostname of the pod.
+  ## @param deployment.subdomain Individual domain of the pod.
+  hostname: ""
+  subdomain: ""
+
+  ## @param deployment.hostNetwork Use the kernel network namespace of the host system.
+  hostNetwork: false
+
+  ## @param deployment.imagePullSecrets Secret to use for pulling the image.
   imagePullSecrets: []
-  lifecycle: {}
-    # preStop:
-    #   exec:
-    #     command: ["/bin/sh", "-c", "sleep 40"]
-    # postStart:
-    #   httpGet:
-    #     path: /
-    #     port: 8080
-    #     host: localhost
-    #     scheme: http
-  # Security context for all initContainers and containers in the pod
-  podSecurityContext:
-    enabled: false
-    fsGroup: 999
-  # Security context specific to the runtime container in the pod.
-  containerSecurityContext:
-    enabled: false
-    runAsUser: 999
-    runAsGroup: 999
+  # - name: "my-custom-secret"
+
+  reposilite:
+    ## @param deployment.reposilite.args Arguments passed to the reposilite container.
+    args: []
+
+    ## @param deployment.reposilite.command COmmand passed to the reposilite container.
+    command: []
+
+    ## @param deployment.reposilite.env List of environment variables for the reposilite container.
+    env: []
+    # - name: SPECIAL_ENV_A
+    #   value: special-key
+    # - name: SPECIAL_ENV
+    #   valueFrom:
+    #     configMapKeyRef:
+    #       name: special-config
+    #       key: special-key
+    # - name: SPECIAL_ENV
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: special-secret
+    #       key: special-key
+
+    ## @param deployment.reposilite.envFrom List of environment variables mounted from configMaps or secrets for the reposilite container.
+    envFrom: []
+    # - configMapRef:
+    #     name: special-config
+    # - secretRef:
+    #     name: special-secret
+
+    ## @param deployment.reposilite.image.registry Image registry, eg. `docker.io`.
+    ## @param deployment.reposilite.image.repository Image repository, eg. `library/busybox`.
+    ## @param deployment.reposilite.image.tag Custom image tag, eg. `0.1.0`. Defaults to `appVersion`.
+    ## @param deployment.reposilite.image.pullPolicy Image pull policy.
+    image:
+      registry: docker.io
+      repository: dzikoysk/reposilite
+      tag: ""
+      pullPolicy: IfNotPresent
+
+    ## @param deployment.reposilite.resources CPU and memory resources of the pod.
+    resources: {}
+      # limits:
+      #   cpu:
+      #   ephemeral-storage:
+      #   memory:
+      # requests:
+      #   cpu:
+      #   ephemeral-storage:
+      #   memory:
+
+    ## @param deployment.reposilite.securityContext Security context of the container of the deployment.
+    securityContext: {}
+      # capabilities:
+      #   add:
+      #   - NET_RAW
+      #   drop:
+      #   - ALL
+      # privileged: false
+      # readOnlyRootFilesystem: true
+      # runAsNonRoot: true
+      # runAsUser: 1000
+
+    ## @param deployment.reposilite.volumeMounts Additional volume mounts.
+    volumeMounts: []
+    # - name: my-configmap-volume
+    #   mountPath: /configmap
+    #   readOnly: true
+
+  ## @param deployment.nodeSelector NodeSelector of the reposilite deployment.
+  nodeSelector: {}
+
+  ## @param deployment.priorityClassName PriorityClassName of the reposilite deployment.
+  priorityClassName: ""
+
+  ## @param deployment.replicas Number of replicas for the reposilite deployment.
+  replicas: 1
+
+  ## @param deployment.restartPolicy Restart policy of the reposilite deployment.
+  restartPolicy: ""
+
+  ## @param deployment.securityContext Security context of the reposilite deployment.
+  securityContext: {}
+    # fsGroup: 2000
+
+  ## @param deployment.strategy.type Strategy type - `Recreate` or `RollingUpdate`.
+  ## @param deployment.strategy.rollingUpdate.maxSurge The maximum number of pods that can be scheduled above the desired number of pods during a rolling update.
+  ## @param deployment.strategy.rollingUpdate.maxUnavailable The maximum number of pods that can be unavailable during a rolling update.
+  strategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+
+  ## @param deployment.terminationGracePeriodSeconds How long to wait until forcefully kill the pod.
+  terminationGracePeriodSeconds: 60
+
+  ## @param deployment.tolerations Tolerations of the reposilite deployment.
+  tolerations: []
+  # - key: database/type
+  #   operator: Equal
+  #   value: postgres
+  #   effect: NoSchedule
+
+  ## @param deployment.topologySpreadConstraints TopologySpreadConstraints of the reposilite deployment.
+  topologySpreadConstraints: []
+  # - topologyKey: kubernetes.io/hostname
+  #   whenUnsatisfiable: DoNotSchedule
+  #   labelSelector:
+  #     matchLabels:
+  #       app.kubernetes.io/instance: prometheus-reposilite
+
+  ## @param deployment.volumes Additional volumes to mount into the pods of the prometheus-exporter deployment.
+  volumes: []
+  # - name: my-configmap-volume
+  #   config:
+  #     name: my-configmap
+  # - name: my-secret-volume
+  #   secret:
+  #     secretName: my-secret
+
 
 ## @section Horizontal Pod Autoscaler (HPA)
 # In order for the HPA to function successfully, a metric server is required, especially for resource consumption. The
@@ -257,42 +376,24 @@ serviceAccount:
     #   fieldPath: "my-field"
 
 ## Resources
-resources:
-  requests:
-    cpu: 1.0
-    memory: 128Mi
-  limits:
-    cpu: 2.0
-    memory: 256Mi
+# resources:
+#   requests:
+#     cpu: 1.0
+#     memory: 128Mi
+#   limits:
+#     cpu: 2.0
+#     memory: 256Mi
 
 ## Environment variables
-env:
-  - name: JAVA_OPTS
-    value: "-Xmx64M"
-#  - name: REPOSILITE_OPTS
-#    value: "--port 8080"
-#  - name: SOME_VAR_FROM_CONFIG_MAP
-#    valueFrom:
-#      configMapRef:
-#        name: config-name
-#        key: config-key
-#  - name: SOME_VAR_FROM_SECRET
-#    valueFrom:
-#      secretKeyRef:
-#        name: secret-name
-#        key: secret-key
+# env:
+#   - name: JAVA_OPTS
+#     value: "-Xmx64M"
 
-## Environment variables from
-envFrom: []
-# - configMapRef:
-#     name: config-map-name
-# - secretRef:
-#     name: secret-name
 
 ## Rolling update
-rollingUpdate:
-  maxUnavailable: 0
-  maxSurge: 1
+# rollingUpdate:
+#   maxUnavailable: 0
+#   maxSurge: 1
 
 ## Persistent Volume Claim
 ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/

@@ -1,0 +1,345 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: Deployment template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/deployment.yaml
+tests:
+- it: Rendering default
+  set: {}
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: reposilite-unittest
+      namespace: testing
+  - notExists:
+      path: metadata.annotations
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - equal:
+      path: spec.replicas
+      value: 1
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - notExists:
+      path: spec.template.spec.affinity
+  - notExists:
+      path: spec.template.spec.containers[0].args
+  - notExists:
+      path: spec.template.spec.containers[0].command
+  - notExists:
+      path: spec.template.spec.volumes
+  - equal:
+      path: spec.template.spec.containers[0].image
+      value: docker.io/dzikoysk/reposilite:0.1.0
+  - equal:
+      path: spec.template.spec.containers[0].imagePullPolicy
+      value: IfNotPresent
+  - notExists:
+      path: spec.template.spec.containers[0].resources
+  - notExists:
+      path: spec.template.spec.containers[0].securityContext
+  - notExists:
+      path: spec.template.spec.containers[0].volumeMounts
+  - notExists:
+      path: spec.template.spec.dnsConfig
+  - notExists:
+      path: spec.template.spec.dnsPolicy
+  - notExists:
+      path: spec.template.spec.hostname
+  - equal:
+      path: spec.template.spec.hostNetwork
+      value: false
+  - notExists:
+      path: spec.template.spec.imagePullSecrets
+  - notExists:
+      path: spec.template.spec.initContainers
+  - notExists:
+      path: spec.template.spec.nodeSelector
+  - notExists:
+      path: spec.template.spec.priorityClassName
+  - notExists:
+      path: spec.template.spec.restartPolicy
+  - notExists:
+      path: spec.template.spec.subdomain
+  - equal:
+      path: spec.template.spec.terminationGracePeriodSeconds
+      value: 60
+  - notExists:
+      path: spec.template.spec.tolerations
+  - notExists:
+      path: spec.template.spec.topologySpreadConstraints
+  - equal:
+      path: spec.strategy
+      value:
+        type: "RollingUpdate"
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 1
+
+- it: Test custom replicas
+  set:
+    deployment.replicas: 3
+  asserts:
+  - equal:
+      path: spec.replicas
+      value: 3
+
+- it: Test custom affinity
+  set:
+    deployment.affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: topology.kubernetes.io/zone
+              operator: In
+              values:
+              - antarctica-east1
+              - antarctica-west1
+  asserts:
+  - equal:
+      path: spec.template.spec.affinity
+      value:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                - antarctica-east1
+                - antarctica-west1
+
+- it: Test additional arguments
+  set:
+    deployment.reposilite.args:
+    - "--foo=bar"
+    - "--bar=foo"
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].args
+      value:
+      - --foo=bar
+      - --bar=foo
+
+- it: Test custom imageRegistry and imageRepository
+  set:
+    deployment.reposilite.image.registry: registry.example.local
+    deployment.reposilite.image.repository: path/special/reposilite
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].image
+      value: registry.example.local/path/special/reposilite:0.1.0
+
+- it: Test custom imagePullPolicy
+  set:
+    deployment.reposilite.image.pullPolicy: Always
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].imagePullPolicy
+      value: Always
+
+- it: Test custom resource limits and requests
+  set:
+    deployment.reposilite.resources:
+      limits:
+        cpu: 100m
+        memory: 250MB
+      requests:
+        cpu: 25m
+        memory: 100MB
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].resources
+      value:
+        limits:
+          cpu: 100m
+          memory: 250MB
+        requests:
+          cpu: 25m
+          memory: 100MB
+
+- it: Test custom securityContext
+  set:
+    deployment.reposilite.securityContext:
+      capabilities:
+        add:
+        - NET_RAW
+        drop:
+        - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].securityContext
+      value:
+        capabilities:
+          add:
+          - NET_RAW
+          drop:
+          - ALL
+        privileged: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 1000
+
+- it: Test dnsConfig
+  set:
+    deployment.dnsConfig:
+      nameservers:
+      - "8.8.8.8"
+      - "8.8.4.4"
+  asserts:
+  - equal:
+      path: spec.template.spec.dnsConfig
+      value:
+        nameservers:
+        - "8.8.8.8"
+        - "8.8.4.4"
+
+- it: Test dnsPolicy
+  set:
+    deployment.dnsPolicy: ClusterFirst
+  asserts:
+  - equal:
+      path: spec.template.spec.dnsPolicy
+      value: ClusterFirst
+
+- it: Test hostNetwork, hostname, subdomain
+  set:
+    deployment.hostNetwork: true
+    deployment.hostname: pg-exporter
+    deployment.subdomain: exporters.internal
+  asserts:
+  - equal:
+      path: spec.template.spec.hostNetwork
+      value: true
+  - equal:
+      path: spec.template.spec.hostname
+      value: pg-exporter
+  - equal:
+      path: spec.template.spec.subdomain
+      value: exporters.internal
+
+- it: Test imagePullSecrets
+  set:
+    deployment.imagePullSecrets:
+    - name: my-pull-secret
+    - name: my-special-secret
+  asserts:
+  - equal:
+      path: spec.template.spec.imagePullSecrets
+      value:
+      - name: my-pull-secret
+      - name: my-special-secret
+
+- it: Test nodeSelector
+  set:
+    deployment.nodeSelector:
+      foo: bar
+  asserts:
+  - equal:
+      path: spec.template.spec.nodeSelector
+      value:
+        foo: bar
+
+- it: Test priorityClassName
+  set:
+    deployment.priorityClassName: my-priority
+  asserts:
+  - equal:
+      path: spec.template.spec.priorityClassName
+      value: my-priority
+
+- it: Test restartPolicy
+  set:
+    deployment.restartPolicy: Always
+  asserts:
+  - equal:
+      path: spec.template.spec.restartPolicy
+      value: Always
+
+- it: Test terminationGracePeriodSeconds
+  set:
+    deployment.terminationGracePeriodSeconds: 120
+  asserts:
+  - equal:
+      path: spec.template.spec.terminationGracePeriodSeconds
+      value: 120
+
+- it: Test tolerations
+  set:
+    deployment.tolerations:
+    - key: database/type
+      operator: Equal
+      value: postgres
+      effect: NoSchedule
+  asserts:
+  - equal:
+      path: spec.template.spec.tolerations
+      value:
+      - key: database/type
+        operator: Equal
+        value: postgres
+        effect: NoSchedule
+
+- it: Test topologySpreadConstraints
+  set:
+    deployment.topologySpreadConstraints:
+    - topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/instance: reposilite
+  asserts:
+  - equal:
+      path: spec.template.spec.topologySpreadConstraints
+      value:
+      - topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: reposilite
+
+- it: Test additional volumeMounts and volumes
+  set:
+    deployment.reposilite.volumeMounts:
+    - name: data
+      mountPath: /usr/lib/data
+    deployment.volumes:
+    - name: data
+      hostPath:
+        path: /usr/lib/data
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].volumeMounts
+      value:
+      - name: data
+        mountPath: /usr/lib/data
+  - equal:
+      path: spec.template.spec.volumes
+      value:
+      - name: data
+        hostPath:
+          path: /usr/lib/data
