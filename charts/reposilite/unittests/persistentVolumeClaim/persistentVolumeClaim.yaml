@@ -1,0 +1,97 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: PersistentVolumeClaim template
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/persistentVolumeClaim.yaml
+tests:
+- it: Skip rendering persistentVolumeClaim, when it's disabled in general
+  set:
+    persistentVolumeClaim.enabled: false
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Skip rendering persistentVolumeClaim, when using an existing persistentVolumeClaim
+  set:
+    persistentVolumeClaim.enabled: true
+    persistentVolumeClaim.existing.enabled: true
+  asserts:
+  - hasDocuments:
+      count: 0
+
+- it: Render default persistentVolumeClaim
+  set:
+    persistentVolumeClaim.enabled: true
+  asserts:
+  - hasDocuments:
+      count: 1
+  - containsDocument:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: reposilite-unittest
+      namespace: testing
+  - equal:
+      path: metadata.annotations
+      value:
+        helm.sh/resource-policy: keep
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        helm.sh/chart: reposilite-0.1.0
+  - contains:
+      path: spec.accessModes
+      content:
+        ReadWriteOnce
+  - equal:
+      path: spec.resources.requests.storage
+      value: 10Gi
+
+- it: Test custom annotations and labels
+  set:
+    persistentVolumeClaim.enabled: true
+    persistentVolumeClaim.new.annotations:
+      foo: bar
+    persistentVolumeClaim.new.labels:
+      foo: bar
+  asserts:
+  - equal:
+      path: metadata.annotations
+      value:
+        foo: bar
+        helm.sh/resource-policy: keep
+  - equal:
+      path: metadata.labels
+      value:
+        app.kubernetes.io/instance: reposilite-unittest
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: reposilite
+        app.kubernetes.io/version: 0.1.0
+        foo: bar
+        helm.sh/chart: reposilite-0.1.0
+
+- it: Test custom access mode
+  set:
+    persistentVolumeClaim.enabled: true
+    persistentVolumeClaim.new.accessMode: ReadWriteMany
+  asserts:
+  - contains:
+      path: spec.accessModes
+      content:
+        ReadWriteMany
+
+- it: Test custom size
+  set:
+    persistentVolumeClaim.enabled: true
+    persistentVolumeClaim.new.size: 50Gi
+  asserts:
+  - equal:
+      path: spec.resources.requests.storage
+      value: 50Gi

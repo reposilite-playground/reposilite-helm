@@ -234,6 +234,7 @@ hpa:
   minReplicas: 1
   maxReplicas: 10
 
+
 ## @section Ingress
 ingress:
   ## @param ingress.enabled Enable creation of an ingress resource. Requires, that the http service is also enabled.
@@ -259,6 +260,7 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
 
 ## @section networkPolicy
 networkPolicy:
@@ -319,6 +321,32 @@ networkPolicy:
   #   - port: http
   #     protocol: TCP
 
+
+## @section networkPolicy
+persistentVolumeClaim:
+  ## @param persistentVolumeClaim.enabled Enable persistence in general.
+  enabled: false
+
+  ## @param persistentVolumeClaim.existing.enabled Enable an existing persistent volume claim.
+  ## @param persistentVolumeClaim.existing.persistentVolumeClaimName Name of the existing persistent volume claim.
+  existing:
+    enabled: false
+    persistentVolumeClaimName: ""
+
+  ## @param persistentVolumeClaim.new.annotations Additional service account annotations.
+  ## @param persistentVolumeClaim.new.labels Additional service account labels.
+  ## @param persistentVolumeClaim.new.accessMode Access mode of the persistent volume claim. More information about the access modes are in detail documented [online](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
+  ## @param persistentVolumeClaim.new.path Path here volume should be mounted into the container file system.
+  ## @param persistentVolumeClaim.new.storageClass Custom storage class. Left it empty to use the clusters default storage class.
+  new:
+    annotations: {}
+    labels: {}
+    accessMode: ReadWriteOnce
+    path: /app/data
+    size: 4Gi
+    storageClass: ""
+
+
 ## @section Service
 ## @param service.enabled Enable the service.
 ## @param service.annotations Additional service annotations.
@@ -374,37 +402,3 @@ serviceAccount:
     # - name: "my-secret"
     #   namespace: "my-namespace"
     #   fieldPath: "my-field"
-
-## Resources
-# resources:
-#   requests:
-#     cpu: 1.0
-#     memory: 128Mi
-#   limits:
-#     cpu: 2.0
-#     memory: 256Mi
-
-## Environment variables
-# env:
-#   - name: JAVA_OPTS
-#     value: "-Xmx64M"
-
-
-## Rolling update
-# rollingUpdate:
-#   maxUnavailable: 0
-#   maxSurge: 1
-
-## Persistent Volume Claim
-## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-## RECOMMENDED: This is required to persist configuration changes and artifacts!
-persistence:
-  enabled: true
-  name: "data"
-  size: 4Gi
-# storageClass: "" # Use this if you wish to define a StorageClass to use.
-  accessMode: ReadWriteOnce
-  annotations: {}
-# existingClaim: "" # Use this if you already have an existing PVC for Reposilite.
-  path: /app/data
-# subPath: "" # Only mount a subdirectory of the Volume to the pod.

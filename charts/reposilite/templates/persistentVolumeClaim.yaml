@@ -1,0 +1,24 @@
+{{- if and .Values.persistentVolumeClaim.enabled (not .Values.persistentVolumeClaim.existing.enabled) -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- with (include "reposilite.persistentVolumeClaim.annotations" . | fromYaml) }}
+  annotations:
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
+  {{- with (include "reposilite.persistentVolumeClaim.labels" . | fromYaml) }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  name: {{ include "reposilite.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - {{ .Values.persistentVolumeClaim.new.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolumeClaim.new.size | quote }}
+  {{- if .Values.persistentVolumeClaim.new.storageClass }}
+  storageClassName: {{ .Values.persistentVolumeClaim.new.storageClass | quote }}
+  {{- end }}
+{{- end -}}
