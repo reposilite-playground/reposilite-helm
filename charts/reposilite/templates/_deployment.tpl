@@ -36,3 +36,27 @@
 {{- include "reposilite.fullname" . -}}
 {{- end -}}
 {{- end }}
+
+{{/* volumeMounts */}}
+
+{{- define "reposilite.deployment.reposilite.volumeMounts" -}}
+{{- $volumeMounts := .Values.deployment.reposilite.volumeMounts | default list }}
+{{- if .Values.persistentVolumeClaim.enabled }}
+{{- $volumeMounts = concat $volumeMounts (list (dict "name" "data" "mountPath" .Values.persistentVolumeClaim.path )) }}
+{{- end }}
+{{ toYaml (dict "volumeMounts" $volumeMounts) }}
+{{- end -}}
+
+{{/* volumes */}}
+
+{{- define "reposilite.deployment.volumes" -}}
+{{- $volumes := .Values.deployment.volumes | default list }}
+
+{{- if and .Values.persistentVolumeClaim.enabled (not .Values.persistentVolumeClaim.existing.enabled) }}
+{{- $persistentVolumeClaimName := include "reposilite.persistentVolumeClaim.name" $ -}}
+{{- $volumes = concat $volumes (list (dict "name" "data" "persistentVolumeClaim" (dict "claimName" $persistentVolumeClaimName))) }}
+{{- end }}
+
+{{ toYaml (dict "volumes" $volumes) }}
+
+{{- end -}}

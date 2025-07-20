@@ -60,8 +60,11 @@ tests:
       path: spec.template.spec.containers[0].args
   - notExists:
       path: spec.template.spec.containers[0].command
-  - notExists:
+  - contains:
       path: spec.template.spec.containers[0].env
+      content:
+        name: JAVA_OPTS
+        value: "-Xmx64M"
   - notExists:
       path: spec.template.spec.containers[0].envFrom
   - equal:
@@ -442,3 +445,4 @@ tests:
       - name: data
         hostPath:
           path: /usr/lib/data
+

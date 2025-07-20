@@ -1,0 +1,42 @@
+chart:
+  appVersion: 0.1.0
+  version: 0.1.0
+suite: Mount persistent volume claim
+release:
+  name: reposilite-unittest
+  namespace: testing
+templates:
+- templates/deployment.yaml
+tests:
+- it: Rendering default volumes and volumeMounts with persistent volume claim
+  set:
+    persistentVolumeClaim.enabled: true
+  asserts:
+  - contains:
+      path: spec.template.spec.containers[0].volumeMounts
+      content:
+        name: data
+        mountPath: /var/lib/reposilite/data
+  - contains:
+      path: spec.template.spec.volumes
+      content:
+        name: data
+        persistentVolumeClaim:
+          claimName: reposilite-unittest
+
+- it: Rendering custom volumes and volumeMounts with persistent volume claim
+  set:
+    persistentVolumeClaim.enabled: true
+    persistentVolumeClaim.path: /usr/lib/reposilite/data
+  asserts:
+  - contains:
+      path: spec.template.spec.containers[0].volumeMounts
+      content:
+        name: data
+        mountPath: /usr/lib/reposilite/data
+  - contains:
+      path: spec.template.spec.volumes
+      content:
+        name: data
+        persistentVolumeClaim:
+          claimName: reposilite-unittest

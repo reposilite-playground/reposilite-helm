@@ -74,12 +74,19 @@ deployment:
   reposilite:
     ## @param deployment.reposilite.args Arguments passed to the reposilite container.
     args: []
+    # - "-c"
+    # - "echo HelloWorld"
 
     ## @param deployment.reposilite.command COmmand passed to the reposilite container.
     command: []
+    # - "/bin/bash"
 
     ## @param deployment.reposilite.env List of environment variables for the reposilite container.
-    env: []
+    ## @param deployment.reposilite.env[0].name JAVA_OPTS: Environment variable to define custom java options.
+    ## @param deployment.reposilite.env[0].value Set custom java options. Use `-Xmx64M` to reduce the heap of the JVM.
+    env:
+    - name: JAVA_OPTS
+      value: "-Xmx64M"
     # - name: SPECIAL_ENV_A
     #   value: special-key
     # - name: SPECIAL_ENV
@@ -325,7 +332,9 @@ networkPolicy:
 ## @section networkPolicy
 persistentVolumeClaim:
   ## @param persistentVolumeClaim.enabled Enable persistence in general.
+  ## @param persistentVolumeClaim.path Path where the persistent volume claim should be mounted into the container file system.
   enabled: false
+  path: /var/lib/reposilite/data
 
   ## @param persistentVolumeClaim.existing.enabled Enable an existing persistent volume claim.
   ## @param persistentVolumeClaim.existing.persistentVolumeClaimName Name of the existing persistent volume claim.
@@ -336,14 +345,12 @@ persistentVolumeClaim:
   ## @param persistentVolumeClaim.new.annotations Additional service account annotations.
   ## @param persistentVolumeClaim.new.labels Additional service account labels.
   ## @param persistentVolumeClaim.new.accessMode Access mode of the persistent volume claim. More information about the access modes are in detail documented [online](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
-  ## @param persistentVolumeClaim.new.path Path here volume should be mounted into the container file system.
   ## @param persistentVolumeClaim.new.storageClass Custom storage class. Left it empty to use the clusters default storage class.
   new:
     annotations: {}
     labels: {}
     accessMode: ReadWriteOnce
-    path: /app/data
-    size: 4Gi
+    size: 10Gi
     storageClass: ""
 
 

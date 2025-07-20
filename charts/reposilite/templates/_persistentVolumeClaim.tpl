@@ -17,3 +17,9 @@ helm.sh/resource-policy: keep
 {{ toYaml .Values.persistentVolumeClaim.new.labels }}
 {{- end }}
 {{- end }}
+
+{{/* name */}}
+
+{{- define "reposilite.persistentVolumeClaim.name" -}}
+{{ include "reposilite.fullname" . }}
+{{- end }}

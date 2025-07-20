@@ -85,9 +85,10 @@ spec:
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with .Values.deployment.reposilite.volumeMounts }}
+        {{- $volumeMounts := (include "reposilite.deployment.reposilite.volumeMounts" . | fromYaml) }}
+        {{- if and (hasKey $volumeMounts "volumeMounts") (gt (len $volumeMounts.volumeMounts) 0) }}
         volumeMounts:
-          {{- toYaml . | nindent 10 }}
+        {{- toYaml $volumeMounts.volumeMounts | nindent 8 }}
         {{- end }}
       {{- with .Values.deployment.dnsConfig }}
       dnsConfig:
@@ -131,7 +132,8 @@ spec:
       topologySpreadConstraints:
       {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with .Values.deployment.volumes }}
+      {{- $volumes := (include "reposilite.deployment.volumes" . | fromYaml) }}
+      {{- if and (hasKey $volumes "volumes") (gt (len $volumes.volumes) 0) }}
       volumes:
-        {{- toYaml . | nindent 8 }}
+      {{- toYaml $volumes.volumes | nindent 6 }}
       {{- end }}
