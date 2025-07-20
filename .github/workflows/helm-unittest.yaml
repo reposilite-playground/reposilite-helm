@@ -1,6 +1,9 @@
-name: 'Helm Unittest'
+name: "Helm Unittest"
 
 on:
+  push:
+    branches:
+    - main
   pull_request: {}
 
 jobs:

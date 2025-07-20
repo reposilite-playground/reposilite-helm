@@ -1,10 +1,9 @@
-# GitHub Actions workflow to automatically deploy the helm chart(s).
-name: "Helm"
+name: "Release"
+
 on:
-  workflow_dispatch:
   push:
-    branches: [ "main" ]
-    paths: [ "charts/**" ]
+    tags: [ "*" ]
+
 
 jobs:
   deploy:
