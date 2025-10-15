@@ -1,6 +1,7 @@
 {{- define "reposilite.podTemplate" }}
     metadata:
       annotations:
+      {{- include "reposilite.podAnnotations" . | nindent 8 -}}
       {{- with .Values.deployment.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
