@@ -43,6 +43,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Common annotations. Overwrite to add custom annotations.
+*/}}
+{{- define "reposilite.podAnnotations" -}}{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "reposilite.selectorLabels" -}}
