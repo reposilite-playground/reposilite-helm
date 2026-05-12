@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "reposilite.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   annotations:
   {{- with .Values.deployment.annotations }}
     {{- toYaml . | nindent 4 }}

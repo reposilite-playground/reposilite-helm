@@ -11,6 +11,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ template "reposilite.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "reposilite.labels" . | nindent 4 }}
 spec:

@@ -3,6 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ template "reposilite.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   annotations:
   {{- with .Values.persistence.annotations  }}
     {{ toYaml . | nindent 4 }}
