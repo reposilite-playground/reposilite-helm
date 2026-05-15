@@ -79,6 +79,8 @@ service:
   type: ClusterIP
   port: 8080
   annotations: {}
+  # Topology-aware routing, e.g. "PreferSameZone" (k8s 1.33+). https://kubernetes.io/docs/concepts/services-networking/service/#traffic-distribution
+  trafficDistribution: ""
 
 ## HorizontalPodAutoscaler configuration.
 autoscaling:
